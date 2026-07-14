@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Market Analysis</title>
     <style>
-        @page { margin: 25.4mm; }
+        @page { margin: 15mm 25.4mm 25.4mm 25.4mm; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; margin: 0; color: #000; }
         table { width: 100%; border-collapse: collapse; }
         td, th { border: 1px solid #000; padding: 4px 6px; vertical-align: middle; font-size: 11px; }
@@ -20,7 +20,7 @@
         .item-cell ol { padding-left: 14px; }
         .item-cell ul li,
         .item-cell ol li { margin: 0 0 3px 0; }
-        .header-wrap { text-align: center; margin-bottom: 10px; }
+        .header-wrap { text-align: center; margin-bottom: 6px; }
         .header-logos { margin-bottom: 6px; }
         .header-logos img { height: 58px; margin: 0 4px; vertical-align: middle; }
         .title { font-size: 19px; font-weight: 700; margin: 18px 0 18px; }
