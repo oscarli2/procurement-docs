@@ -18,8 +18,32 @@ const createEmptyItem = () => ({
   remarks: '',
 });
 
-export default function CreatePPMP({ ppmp = null }) {
+const stripHtml = (value) => (value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const mapMaItemToPpmpItem = (item, marketAnalysis) => {
+  const quantity = Number(item.qty) || 0;
+  const adjustedPrice = Number(item.adjusted_price) || 0;
+
+  return {
+    description: stripHtml(item.item_description),
+    type: 'Goods',
+    quantity: quantity ? String(quantity) : '',
+    size: item.unit || '',
+    mode: 'Market Analysis',
+    pre_procurement: 'Yes',
+    start: '',
+    end: '',
+    delivery: '',
+    source: `Completed MA #${marketAnalysis.id}`,
+    budget: quantity * adjustedPrice,
+    supporting: marketAnalysis.title || marketAnalysis.company_name || 'Completed market analysis',
+    remarks: `Imported from completed MA item ${item.id || ''}`.trim(),
+  };
+};
+
+export default function CreatePPMP({ ppmp = null, mas = [] }) {
   const isEditing = Boolean(ppmp?.id);
+  const [selectedMaId, setSelectedMaId] = useState('');
 
   const [ppmpHeader, setPpmpHeader] = useState(() => ({
     fiscal_year: ppmp?.fiscal_year || new Date().getFullYear(),
@@ -51,6 +75,20 @@ export default function CreatePPMP({ ppmp = null }) {
 
     return mappedItems.length > 0 ? mappedItems : [createEmptyItem()];
   });
+
+  const selectedMa = mas.find((ma) => String(ma.id) === String(selectedMaId)) || null;
+
+  const importCompletedMa = (maId) => {
+    setSelectedMaId(maId);
+
+    const matchedMa = mas.find((ma) => String(ma.id) === String(maId));
+
+    if (!matchedMa?.items?.length) {
+      return;
+    }
+
+    setItems(matchedMa.items.map((item) => mapMaItemToPpmpItem(item, matchedMa)));
+  };
 
   const addItem = () => {
     setItems([...items, createEmptyItem()]);
@@ -160,6 +198,42 @@ export default function CreatePPMP({ ppmp = null }) {
                 >
                   Save Prepared Default
                 </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Import Completed Market Analysis</h3>
+              <p className="text-sm text-slate-600">Load adjusted MA items into the PPMP item cards.</p>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Completed MA</label>
+                <select
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  value={selectedMaId}
+                  onChange={(e) => importCompletedMa(e.target.value)}
+                >
+                  <option value="">-- Select a completed MA --</option>
+                  {mas.map((ma) => (
+                    <option key={ma.id} value={ma.id}>
+                      MA #{ma.id} | {ma.title || ma.company_name || 'Completed MA'} | {ma.items?.length || 0} items
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                {selectedMa ? (
+                  <>
+                    <div className="font-semibold text-slate-900">Imported MA #{selectedMa.id}</div>
+                    <div>{selectedMa.items?.length || 0} items mapped into the PPMP grid.</div>
+                  </>
+                ) : (
+                  'Select a completed MA to prefill the PPMP rows.'
+                )}
               </div>
             </div>
           </section>

@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\MarketAnalysisController;
 use App\Http\Controllers\PpmpController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RfqController;
@@ -33,9 +34,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/create-pr', function () {
-        return Inertia::render('Procurement/CreatePR');
-    });
+    Route::get('/create-pr', [PurchaseRequestController::class, 'create']);
+    Route::get('/mas/create', [MarketAnalysisController::class, 'create']);
+    Route::get('/mas', [MarketAnalysisController::class, 'index']);
+    Route::get('/mas/completed', [MarketAnalysisController::class, 'completed']);
+    Route::post('/mas', [MarketAnalysisController::class, 'store']);
+    Route::get('/mas/{id}/edit', [MarketAnalysisController::class, 'edit']);
+    Route::put('/mas/{id}', [MarketAnalysisController::class, 'update']);
+    Route::delete('/mas/{id}', [MarketAnalysisController::class, 'destroy']);
+    Route::get('/download-ma/{id}', [MarketAnalysisController::class, 'download']);
     Route::get('/prs', [PurchaseRequestController::class, 'index']);
     Route::get('/prs/{id}/edit', [PurchaseRequestController::class, 'edit']);
     Route::put('/prs/{id}', [PurchaseRequestController::class, 'update'])->name('pr.update');

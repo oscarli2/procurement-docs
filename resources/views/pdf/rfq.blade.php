@@ -6,7 +6,7 @@
     <style>
         body { 
             font-family: Arial, sans-serif; 
-            font-size: 9px; /* Slightly smaller to fit all elements */
+            font-size: 10px; /* Slightly smaller to fit all elements */
             margin: 0; 
         }
         table { 
@@ -118,7 +118,7 @@
             <td>Name of Procuring Entity:</td>
             <td>DILG Region VIII</td>
             <td>Date:</td>
-            <td>{{ now()->format('m/d/Y') }}</td>
+            <td>{{ $rfq->date ? \Carbon\Carbon::parse($rfq->date)->format('m/d/Y') : '____________' }}</td>
         </tr>
         <tr>
             <td>Office/End User:</td>

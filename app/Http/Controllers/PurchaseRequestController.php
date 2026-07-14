@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MarketAnalysis;
 use Illuminate\Http\Request;
 use App\Models\PurchaseRequest;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,24 @@ class PurchaseRequestController extends Controller
     private function canViewAll(): bool
     {
         return (bool) auth()->user()?->is_admin;
+    }
+
+    private function completedMarketAnalyses()
+    {
+        $query = MarketAnalysis::with('items')->where('status', 'priced')->latest();
+
+        if (! $this->canViewAll()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        return $query->get();
+    }
+
+    public function create()
+    {
+        return Inertia::render('Procurement/CreatePR', [
+            'mas' => $this->completedMarketAnalyses(),
+        ]);
     }
 
     public function index()

@@ -2,11 +2,21 @@ import React, { useMemo, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function CreateRFQ({ prs = [] }) {
+const mapMaItemToRfqItem = (item) => ({
+  unit: item.unit || 'pc',
+  item_description: item.item_description || '',
+  qty: Number(item.qty) || 0,
+  abc_per_item: Number(item.adjusted_price) || 0,
+  total_abc: (Number(item.qty) || 0) * (Number(item.adjusted_price) || 0),
+});
+
+export default function CreateRFQ({ prs = [], mas = [] }) {
   const [selectedPrId, setSelectedPrId] = useState('');
+  const [selectedMaId, setSelectedMaId] = useState('');
 
   const [rfqHeader, setRfqHeader] = useState(() => ({
     mode_of_procurement: 'Small Value Procurement',
+    date: '',
     submission_deadline: '',
     authorized_signatory: localStorage.getItem('rfq_signatory') || '',
     abc_words: '',
@@ -19,6 +29,11 @@ export default function CreateRFQ({ prs = [] }) {
     [prs, selectedPrId],
   );
 
+  const selectedMa = useMemo(
+    () => mas.find((ma) => String(ma.id) === String(selectedMaId)) || null,
+    [mas, selectedMaId],
+  );
+
   const grandTotal = useMemo(
     () => rfqItems.reduce((sum, item) => sum + Number.parseFloat(item.total_abc || 0), 0),
     [rfqItems],
@@ -27,6 +42,7 @@ export default function CreateRFQ({ prs = [] }) {
   const handlePrSelection = (e) => {
     const prId = e.target.value;
     setSelectedPrId(prId);
+    setSelectedMaId('');
 
     const matchedPr = prs.find((pr) => String(pr.id) === String(prId));
 
@@ -45,6 +61,21 @@ export default function CreateRFQ({ prs = [] }) {
     setRfqItems([]);
   };
 
+  const handleMaSelection = (e) => {
+    const maId = e.target.value;
+    setSelectedMaId(maId);
+    setSelectedPrId('');
+
+    const matchedMa = mas.find((ma) => String(ma.id) === String(maId));
+
+    if (matchedMa?.items?.length) {
+      setRfqItems(matchedMa.items.map(mapMaItemToRfqItem));
+      return;
+    }
+
+    setRfqItems([]);
+  };
+
   const saveSignatoryDefault = () => {
     localStorage.setItem('rfq_signatory', rfqHeader.authorized_signatory);
     alert('Signatory saved as default!');
@@ -53,6 +84,7 @@ export default function CreateRFQ({ prs = [] }) {
   const handleSubmit = () => {
     const payload = {
       selectedPrId,
+      selectedMaId,
       ...rfqHeader,
       items: rfqItems,
     };
@@ -91,15 +123,19 @@ export default function CreateRFQ({ prs = [] }) {
         <div className="space-y-6 px-4 py-6 md:px-8 md:py-8">
           <section className="grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selected PR</div>
-              <div className="mt-2 text-xl font-bold text-slate-900">{selectedPr ? `#${selectedPr.id}` : 'None'}</div>
-              <div className="mt-1 text-sm text-slate-600">{selectedPr?.office_section || 'Choose a PR to begin'}</div>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selected Source</div>
+              <div className="mt-2 text-xl font-bold text-slate-900">
+                {selectedPr ? `PR #${selectedPr.id}` : selectedMa ? `MA #${selectedMa.id}` : 'None'}
+              </div>
+              <div className="mt-1 text-sm text-slate-600">
+                {selectedPr?.office_section || selectedMa?.company_name || 'Choose a PR or a completed MA to begin'}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Loaded Items</div>
               <div className="mt-2 text-xl font-bold text-slate-900">{rfqItems.length}</div>
-              <div className="mt-1 text-sm text-slate-600">Pulled directly from the selected PR</div>
+              <div className="mt-1 text-sm text-slate-600">Pulled from the selected PR or completed MA</div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
@@ -113,41 +149,57 @@ export default function CreateRFQ({ prs = [] }) {
 
           <section className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 shadow-sm md:p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Step 1: Select Approved PR</h3>
-              <p className="text-sm text-slate-600">The selected PR will populate the RFQ items automatically.</p>
+              <h3 className="text-lg font-semibold text-slate-900">Step 1: Select Source</h3>
+              <p className="text-sm text-slate-600">Use an approved PR or a completed MA to populate the RFQ items automatically.</p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-                Select an Approved Purchase Request
-              </label>
-              <select
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                value={selectedPrId}
-                onChange={handlePrSelection}
-              >
-                <option value="">-- Choose a PR to pull data from --</option>
-                {prs.map((pr) => (
-                  <option key={pr.id} value={pr.id}>
-                    PR ID: {pr.id} | Office: {pr.office_section || 'N/A'} | Date: {pr.date || 'N/A'} | Purpose:{' '}
-                    {(pr.purpose || '').substring(0, 50)}...
-                  </option>
-                ))}
-              </select>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Select an Approved Purchase Request</label>
+                <select
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  value={selectedPrId}
+                  onChange={handlePrSelection}
+                >
+                  <option value="">-- Choose a PR to pull data from --</option>
+                  {prs.map((pr) => (
+                    <option key={pr.id} value={pr.id}>
+                      PR ID: {pr.id} | Office: {pr.office_section || 'N/A'} | Date: {pr.date || 'N/A'} | Purpose:{' '}
+                      {(pr.purpose || '').substring(0, 50)}...
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                <div className="rounded-xl bg-slate-50 px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selected PR</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">{selectedPr ? `PR #${selectedPr.id}` : 'None'}</div>
-                </div>
-                <div className="rounded-xl bg-slate-50 px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Office</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">{selectedPr?.office_section || '-'}</div>
-                </div>
-                <div className="rounded-xl bg-slate-50 px-4 py-3">
-                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Items Loaded</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">{rfqItems.length}</div>
-                </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Or select a completed MA</label>
+                <select
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  value={selectedMaId}
+                  onChange={handleMaSelection}
+                >
+                  <option value="">-- Choose a completed MA to pull data from --</option>
+                  {mas.map((ma) => (
+                    <option key={ma.id} value={ma.id}>
+                      MA ID: {ma.id} | Title: {ma.title || ma.company_name || 'N/A'} | Date: {ma.date || 'N/A'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selected PR</div>
+                <div className="mt-1 text-sm font-semibold text-slate-900">{selectedPr ? `PR #${selectedPr.id}` : 'None'}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Selected MA</div>
+                <div className="mt-1 text-sm font-semibold text-slate-900">{selectedMa ? `MA #${selectedMa.id}` : 'None'}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Items Loaded</div>
+                <div className="mt-1 text-sm font-semibold text-slate-900">{rfqItems.length}</div>
               </div>
             </div>
           </section>
@@ -166,6 +218,16 @@ export default function CreateRFQ({ prs = [] }) {
                   className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                   value={rfqHeader.mode_of_procurement}
                   onChange={(e) => setRfqHeader({ ...rfqHeader, mode_of_procurement: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Date</label>
+                <input
+                  type="date"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  value={rfqHeader.date}
+                  onChange={(e) => setRfqHeader({ ...rfqHeader, date: e.target.value })}
                 />
               </div>
 
@@ -289,7 +351,7 @@ export default function CreateRFQ({ prs = [] }) {
           <button
             onClick={handleSubmit}
             className="inline-flex w-full items-center justify-center rounded-xl bg-amber-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!selectedPrId}
+            disabled={!selectedPrId && !selectedMaId}
           >
             Generate RFQ PDF
           </button>
