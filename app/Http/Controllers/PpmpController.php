@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\MarketAnalysis;
 use App\Models\Ppmp;
 use App\Models\PpmpItem;
 use Inertia\Inertia;
@@ -14,6 +15,17 @@ class PpmpController extends Controller
     private function canViewAll(): bool
     {
         return (bool) auth()->user()?->is_admin;
+    }
+
+    private function completedMarketAnalyses()
+    {
+        $query = MarketAnalysis::with('items')->where('status', 'priced')->latest();
+
+        if (! $this->canViewAll()) {
+            $query->where('user_id', auth()->id());
+        }
+
+        return $query->get();
     }
 
     public function index()
@@ -116,7 +128,9 @@ class PpmpController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Procurement/CreatePPMP');
+        return Inertia::render('Procurement/CreatePPMP', [
+            'mas' => $this->completedMarketAnalyses(),
+        ]);
     }
 
     /**

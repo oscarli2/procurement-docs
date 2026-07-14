@@ -65,7 +65,7 @@
                 PR NO.:
             </td>
             <td style="width: 25%;" class="font-bold" rowspan="2">
-                Date: <span style="font-weight: normal;">{{ \Carbon\Carbon::parse($pr->date)->format('m/d/Y') }}</span>
+                Date: <span style="font-weight: normal;">{{ $pr->date ? \Carbon\Carbon::parse($pr->date)->format('m/d/Y') : '____________' }}</span>
             </td>
         </tr>
         <tr>

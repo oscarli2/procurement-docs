@@ -11,8 +11,17 @@ const createEmptyItem = () => ({
   unit_cost: 0,
 });
 
-export default function CreatePR({ pr = null }) {
+const mapMaItemToPrItem = (item) => ({
+  unit: item.unit || 'pc',
+  item_description: item.item_description || '',
+  quantity: Number(item.qty) || 0,
+  unit_cost: Number(item.adjusted_price) || 0,
+  total_cost: (Number(item.qty) || 0) * (Number(item.adjusted_price) || 0),
+});
+
+export default function CreatePR({ pr = null, mas = [] }) {
   const isEditing = Boolean(pr?.id);
+  const [selectedMaId, setSelectedMaId] = useState('');
 
   const [headerData, setHeaderData] = useState(() => ({
     office_section: pr?.office_section || '',
@@ -39,6 +48,11 @@ export default function CreatePR({ pr = null }) {
   const [newItem, setNewItem] = useState(() => createEmptyItem());
   const [editingIndex, setEditingIndex] = useState(null);
 
+  const selectedMa = useMemo(
+    () => mas.find((ma) => String(ma.id) === String(selectedMaId)) || null,
+    [mas, selectedMaId],
+  );
+
   const grandTotal = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity * item.unit_cost, 0),
     [items],
@@ -46,6 +60,24 @@ export default function CreatePR({ pr = null }) {
 
   const resetNewItem = () => {
     setNewItem(createEmptyItem());
+  };
+
+  const importCompletedMa = (maId) => {
+    setSelectedMaId(maId);
+
+    const matchedMa = mas.find((ma) => String(ma.id) === String(maId));
+
+    if (!matchedMa?.items?.length) {
+      return;
+    }
+
+    setItems(matchedMa.items.map(mapMaItemToPrItem));
+    setEditingIndex(null);
+    resetNewItem();
+    setHeaderData((current) => ({
+      ...current,
+      purpose: current.purpose || `Imported from completed Market Analysis #${matchedMa.id}`,
+    }));
   };
 
   const handleSaveItem = () => {
@@ -179,6 +211,42 @@ export default function CreatePR({ pr = null }) {
                   value={headerData.date}
                   onChange={(e) => setHeaderData({ ...headerData, date: e.target.value })}
                 />
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Import Completed Market Analysis</h3>
+              <p className="text-sm text-slate-600">Optionally replace the current line items with adjusted MA items.</p>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">Completed MA</label>
+                <select
+                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  value={selectedMaId}
+                  onChange={(e) => importCompletedMa(e.target.value)}
+                >
+                  <option value="">-- Select a completed MA --</option>
+                  {mas.map((ma) => (
+                    <option key={ma.id} value={ma.id}>
+                      MA #{ma.id} | {ma.title || ma.company_name || 'Completed MA'} | {ma.items?.length || 0} items
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                {selectedMa ? (
+                  <>
+                    <div className="font-semibold text-slate-900">Imported MA #{selectedMa.id}</div>
+                    <div>{selectedMa.items?.length || 0} adjusted items loaded into the PR.</div>
+                  </>
+                ) : (
+                  'Select a completed MA to prefill the item list.'
+                )}
               </div>
             </div>
           </section>

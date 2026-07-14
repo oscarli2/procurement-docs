@@ -5,7 +5,7 @@
     <title>Project Procurement Management Plan</title>
     <style>
         @page { margin: 18mm 12mm; }
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 9px; margin: 0; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; border-spacing: 0; }
         th { border: 1px solid #000; padding: 6px 4px; vertical-align: middle; font-size: 9px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
         td { border: 1px solid #000; padding: 6px 6px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
