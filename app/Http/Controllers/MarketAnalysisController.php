@@ -46,7 +46,7 @@ class MarketAnalysisController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        return response()->json([
+        return Inertia::render('Procurement/CompletedMA', [
             'mas' => $query->get()->map(function (MarketAnalysis $ma) {
                 return [
                     'id' => $ma->id,
@@ -59,6 +59,7 @@ class MarketAnalysisController extends Controller
                     'contact_person' => $ma->contact_person,
                     'mobile_no' => $ma->mobile_no,
                     'signature' => $ma->signature,
+                    'items_count' => $ma->items->count(),
                     'items' => $ma->items->map(fn ($item) => [
                         'unit' => $item->unit,
                         'item_description' => $item->item_description,
