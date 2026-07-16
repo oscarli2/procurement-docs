@@ -9,17 +9,39 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('market_analyses', function (Blueprint $table) {
-            $table->string('company_name')->nullable()->after('date');
-            $table->string('address')->nullable()->after('company_name');
-            $table->string('bir_registration')->nullable()->after('address');
-            $table->string('philgeps')->nullable()->after('bir_registration');
-            $table->string('contact_person')->nullable()->after('philgeps');
-            $table->string('mobile_no')->nullable()->after('contact_person');
-            $table->string('signature')->nullable()->after('mobile_no');
+            if (! Schema::hasColumn('market_analyses', 'company_name')) {
+                $table->string('company_name')->nullable()->after('date');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'address')) {
+                $table->string('address')->nullable()->after('company_name');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'bir_registration')) {
+                $table->string('bir_registration')->nullable()->after('address');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'philgeps')) {
+                $table->string('philgeps')->nullable()->after('bir_registration');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'contact_person')) {
+                $table->string('contact_person')->nullable()->after('philgeps');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'mobile_no')) {
+                $table->string('mobile_no')->nullable()->after('contact_person');
+            }
+
+            if (! Schema::hasColumn('market_analyses', 'signature')) {
+                $table->string('signature')->nullable()->after('mobile_no');
+            }
         });
 
         Schema::table('market_analysis_items', function (Blueprint $table) {
-            $table->decimal('qty', 12, 2)->nullable()->after('item_description');
+            if (! Schema::hasColumn('market_analysis_items', 'qty')) {
+                $table->decimal('qty', 12, 2)->nullable()->after('item_description');
+            }
         });
     }
 
