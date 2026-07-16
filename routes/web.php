@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/create-pr', [PurchaseRequestController::class, 'create']);
     Route::get('/mas/create', [MarketAnalysisController::class, 'create']);
     Route::get('/mas', [MarketAnalysisController::class, 'index']);
-    Route::get('/mas/completed', [MarketAnalysisController::class, 'completed']);
+    Route::get('/mas/completed', [MarketAnalysisController::class, 'completed'])->name('mas.completed');
     Route::post('/mas', [MarketAnalysisController::class, 'store']);
     Route::get('/mas/{id}/edit', [MarketAnalysisController::class, 'edit']);
     Route::put('/mas/{id}', [MarketAnalysisController::class, 'update']);

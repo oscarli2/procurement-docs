@@ -128,7 +128,7 @@ class MarketAnalysisController extends Controller
             return $ma;
         });
 
-        return Inertia::location('/download-ma/' . $ma->id);
+        return redirect()->route('mas.completed')->with('success', 'Market Analysis marked as completed.');
     }
 
     public function update(Request $request, $id)
