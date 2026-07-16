@@ -11,6 +11,16 @@ const emptyItem = () => ({
   supplier_price: '',
 });
 
+const normalizeQty = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  const parsed = Number.parseInt(String(value), 10);
+
+  return Number.isNaN(parsed) ? '' : String(parsed);
+};
+
 export default function CreateMA({ ma = null }) {
   const isEditing = Boolean(ma?.id);
 
@@ -29,7 +39,7 @@ export default function CreateMA({ ma = null }) {
     const mapped = (ma?.items || []).map((item) => ({
       unit: item.unit || 'pc',
       item_description: item.item_description || '',
-      qty: item.qty ?? '',
+      qty: normalizeQty(item.qty),
       supplier_price: item.supplier_price ?? '',
     }));
 
@@ -60,7 +70,11 @@ export default function CreateMA({ ma = null }) {
   const handleInitialSubmit = () => {
     router.post('/mas', {
       ...headerData,
-      items: items.map(({ unit, item_description, qty }) => ({ unit, item_description, qty })),
+      items: items.map(({ unit, item_description, qty }) => ({
+        unit,
+        item_description,
+        qty: normalizeQty(qty),
+      })),
       }, {
         preserveScroll: true,
         onError: (errors) => {
@@ -71,7 +85,13 @@ export default function CreateMA({ ma = null }) {
   };
 
   const handlePricingSubmit = () => {
-    router.put(`/mas/${ma.id}`, { ...headerData, items }, {
+    router.put(`/mas/${ma.id}`, {
+      ...headerData,
+      items: items.map((item) => ({
+        ...item,
+        qty: normalizeQty(item.qty),
+      })),
+    }, {
       preserveScroll: true,
       onError: (errors) => {
         console.error('MA update failed', errors);
