@@ -46,7 +46,7 @@ class MarketAnalysisController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        return Inertia::render('Procurement/ManageMA', [
+        return Inertia::render('Procurement/CompletedMA', [
             'mas' => $query->get()->map(function (MarketAnalysis $ma) {
                 return [
                     'id' => $ma->id,
