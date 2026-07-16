@@ -28,6 +28,10 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserAdminController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserAdminController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [UserAdminController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserAdminController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/toggle-admin', [UserAdminController::class, 'toggleAdmin'])->name('users.toggle-admin');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

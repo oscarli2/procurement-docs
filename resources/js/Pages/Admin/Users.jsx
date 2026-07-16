@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 
 export default function Users({ users = [] }) {
     const currentUser = usePage().props.auth.user;
@@ -86,6 +86,12 @@ export default function Users({ users = [] }) {
                                                     </td>
                                                     <td className="px-4 py-4">
                                                         <div className="flex flex-wrap justify-center gap-2">
+                                                            <Link
+                                                                href={route('users.edit', user.id)}
+                                                                className="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-amber-600"
+                                                            >
+                                                                Edit
+                                                            </Link>
                                                             {user.id === currentUser.id ? (
                                                                 <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-500">
                                                                     Current Admin
@@ -117,6 +123,15 @@ export default function Users({ users = [] }) {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                    <Link
+                        href={route('users.create')}
+                        className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    >
+                        Add New User
+                    </Link>
                 </div>
             </div>
         </AuthenticatedLayout>
