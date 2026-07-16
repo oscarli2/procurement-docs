@@ -61,11 +61,23 @@ export default function CreateMA({ ma = null }) {
     router.post('/mas', {
       ...headerData,
       items: items.map(({ unit, item_description, qty }) => ({ unit, item_description, qty })),
+      }, {
+        preserveScroll: true,
+        onError: (errors) => {
+          console.error('MA create failed', errors);
+          alert('Could not save the MA. Please check the inputs and try again.');
+        },
     });
   };
 
   const handlePricingSubmit = () => {
-    router.put(`/mas/${ma.id}`, { ...headerData, items });
+    router.put(`/mas/${ma.id}`, { ...headerData, items }, {
+      preserveScroll: true,
+      onError: (errors) => {
+        console.error('MA update failed', errors);
+        alert('Could not save the MA pricing. Please check the inputs and try again.');
+      },
+    });
   };
 
   return (
