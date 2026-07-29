@@ -7,6 +7,7 @@
         @page { margin: 8mm 12mm 14mm; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; padding: 0; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed !important; border-spacing: 0; }
+        .ppmp-table { width: 306mm !important; table-layout: fixed !important; }
         th { border: 1px solid #000; padding: 4px 3px; vertical-align: middle; font-size: 8px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.1; }
         td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
         thead { display: table-header-group; }
@@ -14,6 +15,14 @@
         tr { page-break-inside: auto; break-inside: auto; }
         .ppmp-item-row { page-break-inside: auto; break-inside: auto; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+        .column-sizing th {
+            height: 0;
+            min-height: 0;
+            padding: 0;
+            border: 0;
+            font-size: 0;
+            line-height: 0;
+        }
         .no-border { border: none !important; }
         .text-center { text-align: center; }
         .font-bold { font-weight: bold; }
@@ -83,21 +92,22 @@
     </div>
 
     <table class="ppmp-table" style="margin-top:0; margin-bottom:8px;">
-        <colgroup>
-            <col width="23%" style="width:23%;">
-            <col width="8%" style="width:8%;">
-            <col width="18%" style="width:18%;">
-            <col width="10%" style="width:10%;">
-            <col width="4%" style="width:4%;">
-            <col width="5%" style="width:5%;">
-            <col width="5%" style="width:5%;">
-            <col width="7%" style="width:7%;">
-            <col width="6%" style="width:6%;">
-            <col width="8%" style="width:8%;">
-            <col width="3%" style="width:3%;">
-            <col width="3%" style="width:3%;">
-        </colgroup>
         <thead>
+            {{-- Dompdf calculates fixed table widths from the first row, not reliably from colgroup. --}}
+            <tr class="column-sizing">
+                <th width="70mm" style="width:70mm;"></th>
+                <th width="24mm" style="width:24mm;"></th>
+                <th width="55mm" style="width:55mm;"></th>
+                <th width="31mm" style="width:31mm;"></th>
+                <th width="12mm" style="width:12mm;"></th>
+                <th width="15mm" style="width:15mm;"></th>
+                <th width="15mm" style="width:15mm;"></th>
+                <th width="21mm" style="width:21mm;"></th>
+                <th width="18mm" style="width:18mm;"></th>
+                <th width="24mm" style="width:24mm;"></th>
+                <th width="9mm" style="width:9mm;"></th>
+                <th width="12mm" style="width:12mm;"></th>
+            </tr>
             <tr>
                 <th class="group-heading" colspan="5">PROCUREMENT PROJECT DETAILS</th>
                 <th class="group-heading" colspan="3">PROJECTED TIMELINE (MM/YYYY)</th>
