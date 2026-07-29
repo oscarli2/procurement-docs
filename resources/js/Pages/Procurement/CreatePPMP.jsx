@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const createEmptyItem = () => ({
   description: '',
@@ -19,6 +21,10 @@ const createEmptyItem = () => ({
 });
 
 const stripHtml = (value) => (value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const quillModules = {
+  toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']],
+};
 
 const mapMaItemToPpmpItem = (item, marketAnalysis) => {
   const quantity = Number(item.qty) || 0;
@@ -332,11 +338,15 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-semibold text-slate-700">Size</label>
-                        <input
-                          value={it.size}
-                          onChange={(e) => updateItem(idx, 'size', e.target.value)}
-                          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                        />
+                        <div className="rounded-xl border border-slate-300 bg-white p-2 shadow-sm">
+                          <ReactQuill
+                            theme="snow"
+                            value={it.size}
+                            onChange={(content) => updateItem(idx, 'size', content)}
+                            modules={quillModules}
+                            className="min-h-[120px]"
+                          />
+                        </div>
                       </div>
                     </div>
 

@@ -332,9 +332,7 @@ class PpmpController extends Controller
                 return [
                     'description' => $it->description,
                     'type' => $it->type,
-                    'quantity' => $size !== '' && $quantity !== ''
-                        ? $quantity . "\n" . $size
-                        : ($size !== '' ? $size : $quantity),
+                    'quantity' => $quantity,
                     'size' => $it->size,
                     'mode' => $it->mode,
                     'pre_procurement' => $it->pre_procurement ? ucfirst($it->pre_procurement) : '',

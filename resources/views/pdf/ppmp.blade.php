@@ -118,7 +118,12 @@
             <tr>
                 <td>{!! nl2br(e($item['description'])) !!}</td>
                 <td class="text-center">{{ $item['type'] }}</td>
-                <td class="text-center">{!! nl2br(e($item['quantity'])) !!}</td>
+                <td class="text-center">
+                    {!! nl2br(e($item['quantity'])) !!}
+                    @if(!empty($item['size']))
+                        <div style="margin-top:4px; text-align:left;">{!! $item['size'] !!}</div>
+                    @endif
+                </td>
                 <td class="text-center">{{ $item['mode'] }}</td>
                 <td class="text-center">{{ $item['pre_procurement'] }}</td>
                 <td class="text-center">{{ $item['start'] }}</td>
