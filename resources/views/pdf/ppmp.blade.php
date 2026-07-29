@@ -9,6 +9,11 @@
         table { width: 100%; border-collapse: collapse; table-layout: fixed !important; border-spacing: 0; }
         th { border: 1px solid #000; padding: 4px 3px; vertical-align: middle; font-size: 8px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.1; }
         td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        thead { display: table-header-group; }
+        tbody { display: table-row-group; }
+        tr { page-break-inside: avoid; break-inside: avoid; }
+        .ppmp-item-row { page-break-inside: avoid; break-inside: avoid; }
+        .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
         .no-border { border: none !important; }
         .text-center { text-align: center; }
         .font-bold { font-weight: bold; }
@@ -115,10 +120,10 @@
         </thead>
         <tbody>
             @foreach($ppmp['items'] as $index => $item)
-            <tr>
-                <td>{!! $item['description'] !!}</td>
+            <tr class="ppmp-item-row">
+                <td class="ppmp-long-text">{!! $item['description'] !!}</td>
                 <td class="text-center">{{ $item['type'] }}</td>
-                <td class="text-center">
+                <td class="text-center ppmp-long-text">
                     {!! nl2br(e($item['quantity'])) !!}
                     @if(!empty($item['size']))
                         <div style="margin-top:4px; text-align:left;">{!! $item['size'] !!}</div>
