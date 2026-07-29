@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Project Procurement Management Plan</title>
     <style>
-        @page { margin: 18mm 12mm; }
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; }
+        @page { margin: 8mm 12mm 14mm; }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; padding: 0; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed !important; border-spacing: 0; }
         th { border: 1px solid #000; padding: 4px 3px; vertical-align: middle; font-size: 8px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.1; }
         td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
@@ -50,7 +50,7 @@
 </head>
 <body>
 
-    <table class="header-section" style="margin-bottom: 0px;">
+    <table class="header-section" style="margin: 0 0 0 0;">
         <tr>
             <td class="header-logo" style="width:140px; text-align:left; vertical-align:middle; padding-left:6px;"></td>
             <td style="text-align:center;">
