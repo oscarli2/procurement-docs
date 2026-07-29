@@ -81,9 +81,9 @@
         <colgroup>
             <col style="width:33%" />
             <col style="width:8%" />
-            <col style="width:11%" />
+            <col style="width:13%" />
             <col style="width:10%" />
-            <col style="width:4%" />
+            <col style="width:2%" />
             <col style="width:5%" />
             <col style="width:5%" />
             <col style="width:6%" />
@@ -103,9 +103,9 @@
             <tr>
                 <th style="width:34%">General Description and Objective of the Project to be Procured</th>
                 <th style="width:8%">Type of the Project to be Procured</th>
-                <th style="width:11%">Quantity and Size of the Project to be Procured</th>
+                <th style="width:13%">Quantity and Size of the Project to be Procured</th>
                 <th style="width:10%">Recommended Mode of Procurement</th>
-                <th style="width:4%">Pre-Procurement Conference (Yes/No)</th>
+                <th style="width:2%">Pre-Procurement Conference (Yes/No)</th>
                 <th style="width:5%">Start of Procurement Activity</th>
                 <th style="width:5%">End of Procurement Activity</th>
                 <th style="width:6%">Expected Delivery/Implementation Period</th>
