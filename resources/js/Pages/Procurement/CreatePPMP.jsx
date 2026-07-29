@@ -26,6 +26,20 @@ const quillModules = {
   toolbar: [['bold', 'italic', 'underline'], [{ list: 'bullet' }], ['clean']],
 };
 
+const modeOptions = [
+  'Competitive Bidding',
+  'Limited Source Bidding',
+  'Competitive Dialogue',
+  'Unsolicited Offer with Bid Matching',
+  'Direct Contracting',
+  'Direct Acquisition',
+  'Repeat Order',
+  'Small Value Procurement',
+  'Negotiated Procurement',
+  'Direct Sales',
+  'Direct Procurement for Science, Technology, and Innovation',
+];
+
 const mapMaItemToPpmpItem = (item, marketAnalysis) => {
   const quantity = Number(item.qty) || 0;
   const adjustedPrice = Number(item.adjusted_price) || 0;
@@ -357,11 +371,18 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
                     <div className="lg:col-span-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
                       <div>
                         <label className="mb-1.5 block text-sm font-semibold text-slate-700">Mode</label>
-                        <input
+                        <select
                           value={it.mode}
                           onChange={(e) => updateItem(idx, 'mode', e.target.value)}
                           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                        />
+                        >
+                          <option value="">Select Mode</option>
+                          {modeOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="mb-1.5 block text-sm font-semibold text-slate-700">Pre-Proc</label>
