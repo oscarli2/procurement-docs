@@ -82,40 +82,40 @@
         <div style="text-align:left; font-size:10px;">End-User or Implementing Unit: <strong>{{ $ppmp['end_user'] }}</strong></div>
     </div>
 
-    <table style="margin-top:0; margin-bottom:8px;">
+    <table class="ppmp-table" style="margin-top:0; margin-bottom:8px;">
         <colgroup>
-            <col style="width:32%" />
-            <col style="width:8%" />
-            <col style="width:16%" />
-            <col style="width:10%" />
-            <col style="width:4%" />
-            <col style="width:5%" />
-            <col style="width:5%" />
-            <col style="width:6%" />
-            <col style="width:6%" />
-            <col style="width:6%" />
-            <col style="width:1.5%" />
-            <col style="width:1.5%" />
+            <col width="23%" style="width:23%;">
+            <col width="8%" style="width:8%;">
+            <col width="18%" style="width:18%;">
+            <col width="10%" style="width:10%;">
+            <col width="4%" style="width:4%;">
+            <col width="5%" style="width:5%;">
+            <col width="5%" style="width:5%;">
+            <col width="7%" style="width:7%;">
+            <col width="6%" style="width:6%;">
+            <col width="8%" style="width:8%;">
+            <col width="3%" style="width:3%;">
+            <col width="3%" style="width:3%;">
         </colgroup>
         <thead>
             <tr>
                 <th class="group-heading" colspan="5">PROCUREMENT PROJECT DETAILS</th>
                 <th class="group-heading" colspan="3">PROJECTED TIMELINE (MM/YYYY)</th>
                 <th class="group-heading" colspan="2">FUNDING DETAILS</th>
-                <th class="group-heading" rowspan="2" style="width:7%">ATTACHED SUPPORTING DOCUMENTS</th>
-                <th class="group-heading" rowspan="2" style="width:7%">REMARKS</th>
+                <th class="group-heading" rowspan="2">ATTACHED SUPPORTING DOCUMENTS</th>
+                <th class="group-heading" rowspan="2">REMARKS</th>
             </tr>
             <tr>
-                <th style="width:34%">General Description and Objective of the Project to be Procured</th>
-                <th style="width:8%">Type of the Project to be Procured</th>
-                <th style="width:16%">Quantity and Size of the Project to be Procured</th>
-                <th style="width:10%">Recommended Mode of Procurement</th>
-                <th style="width:4%">Pre-Procurement Conference (Yes/No)</th>
-                <th style="width:5%">Start of Procurement Activity</th>
-                <th style="width:5%">End of Procurement Activity</th>
-                <th style="width:6%">Expected Delivery/Implementation Period</th>
-                <th style="width:6%">Source of Funds</th>
-                <th style="width:6%">Estimated Budget / Authorized Budgetary Allocation (PhP)</th>
+                <th>General Description and Objective of the Project to be Procured</th>
+                <th>Type of the Project to be Procured</th>
+                <th>Quantity and Size of the Project to be Procured</th>
+                <th>Recommended Mode of Procurement</th>
+                <th>Pre-Procurement Conference (Yes/No)</th>
+                <th>Start of Procurement Activity</th>
+                <th>End of Procurement Activity</th>
+                <th>Expected Delivery/Implementation Period</th>
+                <th>Source of Funds</th>
+                <th>Estimated Budget / Authorized Budgetary Allocation (PhP)</th>
             </tr>
         </thead>
         <tbody>
