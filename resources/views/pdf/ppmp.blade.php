@@ -81,9 +81,9 @@
         <colgroup>
             <col style="width:34%" />
             <col style="width:8%" />
-            <col style="width:3%" />
+            <col style="width:6%" />
             <col style="width:11%" />
-            <col style="width:2%" />
+            <col style="width:1%" />
             <col style="width:5%" />
             <col style="width:5%" />
             <col style="width:6%" />
