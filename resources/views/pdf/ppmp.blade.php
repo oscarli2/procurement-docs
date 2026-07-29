@@ -7,8 +7,8 @@
         @page { margin: 18mm 12mm; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; border-spacing: 0; }
-        th { border: 1px solid #000; padding: 6px 4px; vertical-align: middle; font-size: 9px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
-        td { border: 1px solid #000; padding: 6px 6px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        th { border: 1px solid #000; padding: 4px 3px; vertical-align: middle; font-size: 8px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.1; }
+        td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
         .no-border { border: none !important; }
         .text-center { text-align: center; }
         .font-bold { font-weight: bold; }
@@ -79,18 +79,18 @@
 
     <table style="margin-top:0; margin-bottom:8px;">
         <colgroup>
-            <col style="width:34%" />
+            <col style="width:33%" />
             <col style="width:8%" />
-            <col style="width:7%" />
             <col style="width:11%" />
-            <col style="width:1.5%" />
+            <col style="width:10%" />
+            <col style="width:4%" />
             <col style="width:5%" />
             <col style="width:5%" />
             <col style="width:6%" />
             <col style="width:6%" />
             <col style="width:6%" />
-            <col style="width:7%" />
-            <col style="width:7%" />
+            <col style="width:3.5%" />
+            <col style="width:3.5%" />
         </colgroup>
         <thead>
             <tr>
@@ -103,9 +103,9 @@
             <tr>
                 <th style="width:34%">General Description and Objective of the Project to be Procured</th>
                 <th style="width:8%">Type of the Project to be Procured</th>
-                <th style="width:7%">Quantity and Size of the Project to be Procured</th>
-                <th style="width:11%">Recommended Mode of Procurement</th>
-                <th style="width:1.5%">Pre-Procurement Conference (Yes/No)</th>
+                <th style="width:11%">Quantity and Size of the Project to be Procured</th>
+                <th style="width:10%">Recommended Mode of Procurement</th>
+                <th style="width:4%">Pre-Procurement Conference (Yes/No)</th>
                 <th style="width:5%">Start of Procurement Activity</th>
                 <th style="width:5%">End of Procurement Activity</th>
                 <th style="width:6%">Expected Delivery/Implementation Period</th>
