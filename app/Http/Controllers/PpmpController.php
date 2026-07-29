@@ -32,6 +32,14 @@ class PpmpController extends Controller
         });
     }
 
+    private function orderedItems($items)
+    {
+        return $items->sortBy([
+            ['sort_order', 'asc'],
+            ['id', 'asc'],
+        ])->values();
+    }
+
     public function index()
     {
         $query = Ppmp::withCount('items')->latest();
@@ -51,6 +59,8 @@ class PpmpController extends Controller
     {
         $ppmp = Ppmp::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $ppmp->user_id === auth()->id(), 403);
+
+        $ppmp->setRelation('items', $this->orderedItems($ppmp->items));
 
         return Inertia::render('Procurement/CreatePPMP', [
             'ppmp' => $ppmp,
@@ -292,7 +302,7 @@ class PpmpController extends Controller
     {
         $ppmp = Ppmp::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $ppmp->user_id === auth()->id(), 403);
-        $ppmp->setRelation('items', $ppmp->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+        $ppmp->setRelation('items', $this->orderedItems($ppmp->items));
         // helper to format month/year values to MM/YYYY
         $fmtMonthYear = function ($val) {
             if (empty($val)) return '';
