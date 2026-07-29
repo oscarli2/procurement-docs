@@ -15,8 +15,8 @@ const mapMaItemToPrItem = (item) => ({
   unit: item.unit || 'pc',
   item_description: item.item_description || '',
   quantity: Number(item.qty) || 0,
-  unit_cost: Number(item.adjusted_price) || 0,
-  total_cost: (Number(item.qty) || 0) * (Number(item.adjusted_price) || 0),
+  unit_cost: Number(item.supplier_price) || 0,
+  total_cost: (Number(item.qty) || 0) * (Number(item.supplier_price) || 0),
 });
 
 export default function CreatePR({ pr = null, mas = [] }) {
@@ -218,7 +218,7 @@ export default function CreatePR({ pr = null, mas = [] }) {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-slate-900">Import Completed Market Analysis</h3>
-              <p className="text-sm text-slate-600">Optionally replace the current line items with adjusted MA items.</p>
+              <p className="text-sm text-slate-600">Optionally replace the current line items with the original MA item prices.</p>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -242,7 +242,7 @@ export default function CreatePR({ pr = null, mas = [] }) {
                 {selectedMa ? (
                   <>
                     <div className="font-semibold text-slate-900">Imported MA #{selectedMa.id}</div>
-                    <div>{selectedMa.items?.length || 0} adjusted items loaded into the PR.</div>
+                    <div>{selectedMa.items?.length || 0} items loaded into the PR using their original prices.</div>
                   </>
                 ) : (
                   'Select a completed MA to prefill the item list.'
