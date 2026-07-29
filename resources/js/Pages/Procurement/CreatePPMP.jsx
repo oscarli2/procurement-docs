@@ -31,7 +31,7 @@ const mapMaItemToPpmpItem = (item, marketAnalysis) => {
   const adjustedPrice = Number(item.adjusted_price) || 0;
 
   return {
-    description: stripHtml(item.item_description),
+    description: item.item_description || '',
     type: 'Goods',
     quantity: quantity ? String(quantity) : '',
     size: item.unit || '',
@@ -307,14 +307,18 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                     <div className="lg:col-span-5">
                       <label className="mb-1.5 block text-sm font-semibold text-slate-700">Description</label>
-                      <textarea
-                        className="min-h-[120px] w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                        value={it.description}
-                        onChange={(e) => updateItem(idx, 'description', e.target.value)}
-                      />
+                      <div className="rounded-xl border border-slate-300 bg-white p-2 shadow-sm">
+                        <ReactQuill
+                          theme="snow"
+                          value={it.description}
+                          onChange={(content) => updateItem(idx, 'description', content)}
+                          modules={quillModules}
+                          className="min-h-[160px]"
+                        />
+                      </div>
                     </div>
 
                     <div className="lg:col-span-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">

@@ -116,7 +116,7 @@
         <tbody>
             @foreach($ppmp['items'] as $index => $item)
             <tr>
-                <td>{!! nl2br(e($item['description'])) !!}</td>
+                <td>{!! $item['description'] !!}</td>
                 <td class="text-center">{{ $item['type'] }}</td>
                 <td class="text-center">
                     {!! nl2br(e($item['quantity'])) !!}
