@@ -15,13 +15,14 @@
         tr { page-break-inside: auto; break-inside: auto; }
         .ppmp-item-row { page-break-inside: auto; break-inside: auto; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
-        .column-sizing th {
-            height: 0;
-            min-height: 0;
+        .column-sizing td {
+            height: 1px;
+            min-height: 1px;
             padding: 0;
             border: 0;
-            font-size: 0;
-            line-height: 0;
+            color: #fff;
+            font-size: 1px;
+            line-height: 1px;
         }
         .no-border { border: none !important; }
         .text-center { text-align: center; }
@@ -93,20 +94,20 @@
 
     <table class="ppmp-table" style="margin-top:0; margin-bottom:8px;">
         <thead>
-            {{-- Dompdf calculates fixed table widths from the first row, not reliably from colgroup. --}}
+            {{-- Dompdf requires non-empty TD widths in the first row for fixed table layout. --}}
             <tr class="column-sizing">
-                <th width="70mm" style="width:70mm;"></th>
-                <th width="24mm" style="width:24mm;"></th>
-                <th width="55mm" style="width:55mm;"></th>
-                <th width="31mm" style="width:31mm;"></th>
-                <th width="12mm" style="width:12mm;"></th>
-                <th width="15mm" style="width:15mm;"></th>
-                <th width="15mm" style="width:15mm;"></th>
-                <th width="21mm" style="width:21mm;"></th>
-                <th width="18mm" style="width:18mm;"></th>
-                <th width="24mm" style="width:24mm;"></th>
-                <th width="9mm" style="width:9mm;"></th>
-                <th width="12mm" style="width:12mm;"></th>
+                <td width="23%" style="width:23%;">&nbsp;</td>
+                <td width="8%" style="width:8%;">&nbsp;</td>
+                <td width="18%" style="width:18%;">&nbsp;</td>
+                <td width="10%" style="width:10%;">&nbsp;</td>
+                <td width="4%" style="width:4%;">&nbsp;</td>
+                <td width="5%" style="width:5%;">&nbsp;</td>
+                <td width="5%" style="width:5%;">&nbsp;</td>
+                <td width="7%" style="width:7%;">&nbsp;</td>
+                <td width="6%" style="width:6%;">&nbsp;</td>
+                <td width="8%" style="width:8%;">&nbsp;</td>
+                <td width="3%" style="width:3%;">&nbsp;</td>
+                <td width="3%" style="width:3%;">&nbsp;</td>
             </tr>
             <tr>
                 <th class="group-heading" colspan="5">PROCUREMENT PROJECT DETAILS</th>
