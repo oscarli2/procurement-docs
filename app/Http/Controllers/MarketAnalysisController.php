@@ -117,8 +117,9 @@ class MarketAnalysisController extends Controller
                 'status' => 'draft',
             ]);
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $ma->items()->create([
+                    'sort_order' => $index,
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'qty' => $item['qty'] ?? null,
@@ -169,7 +170,7 @@ class MarketAnalysisController extends Controller
 
             $ma->items()->delete();
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $supplierPrice = isset($item['supplier_price']) && $item['supplier_price'] !== ''
                     ? (float) $item['supplier_price']
                     : null;
@@ -177,6 +178,7 @@ class MarketAnalysisController extends Controller
                 $markup = $supplierPrice === null ? null : [100, 150, 200, 250, 300][array_rand([100, 150, 200, 250, 300])];
 
                 $ma->items()->create([
+                    'sort_order' => $index,
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'qty' => $item['qty'] ?? null,

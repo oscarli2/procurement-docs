@@ -89,8 +89,9 @@ class PurchaseRequestController extends Controller
                 'approved_by_designation' => $data['approved_by_designation'] ?? null,
             ]);
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $pr->items()->create([
+                    'sort_order' => $index,
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
@@ -140,8 +141,9 @@ class PurchaseRequestController extends Controller
 
             $pr->items()->delete();
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $pr->items()->create([
+                    'sort_order' => $index,
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'quantity' => $item['quantity'] ?? null,

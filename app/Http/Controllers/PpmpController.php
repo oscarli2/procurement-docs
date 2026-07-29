@@ -172,8 +172,9 @@ class PpmpController extends Controller
                 'submitted_by_designation' => $data['submitted_by_designation'] ?? null,
             ]);
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $ppmp->items()->create([
+                    'sort_order' => $index,
                     'description' => $item['description'] ?? null,
                     'type' => $item['type'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
@@ -237,8 +238,9 @@ class PpmpController extends Controller
 
             $ppmp->items()->delete();
 
-            foreach ($data['items'] as $item) {
+            foreach ($data['items'] as $index => $item) {
                 $ppmp->items()->create([
+                    'sort_order' => $index,
                     'description' => $item['description'] ?? null,
                     'type' => $item['type'] ?? null,
                     'quantity' => $item['quantity'] ?? null,

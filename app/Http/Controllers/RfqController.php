@@ -90,11 +90,12 @@ class RfqController extends Controller
                 'purpose' => $marketAnalysis->title ?: 'Generated from Market Analysis #' . $marketAnalysis->id,
             ]);
 
-            foreach ($marketAnalysis->items as $item) {
+            foreach ($marketAnalysis->items as $index => $item) {
                 $quantity = (float) ($item->qty ?? 0);
                 $unitCost = (float) ($item->adjusted_price ?? 0);
 
                 $purchaseRequest->items()->create([
+                    'sort_order' => $index,
                     'unit' => $item->unit,
                     'item_description' => $item->item_description,
                     'quantity' => $quantity,
@@ -119,8 +120,9 @@ class RfqController extends Controller
         ]);
 
         // 2. Loop through and save the items pulled from the PR
-        foreach ($data['items'] as $item) {
+        foreach ($data['items'] as $index => $item) {
             $rfq->items()->create([
+                'sort_order' => $index,
                 'unit' => $item['unit'],
                 'item_description' => $item['item_description'],
                 'qty' => $item['qty'],

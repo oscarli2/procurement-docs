@@ -15,7 +15,7 @@ class Rfq extends Model
 
     // An RFQ has many items
     public function items() {
-        return $this->hasMany(RfqItem::class);
+        return $this->hasMany(RfqItem::class)->orderBy('sort_order')->orderBy('id');
     }
 
     // An RFQ belongs to a Purchase Request
