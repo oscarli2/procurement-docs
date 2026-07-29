@@ -11,8 +11,8 @@
         td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
         thead { display: table-header-group; }
         tbody { display: table-row-group; }
-        tr { page-break-inside: avoid; break-inside: avoid; }
-        .ppmp-item-row { page-break-inside: avoid; break-inside: avoid; }
+        tr { page-break-inside: auto; break-inside: auto; }
+        .ppmp-item-row { page-break-inside: auto; break-inside: auto; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
         .no-border { border: none !important; }
         .text-center { text-align: center; }
