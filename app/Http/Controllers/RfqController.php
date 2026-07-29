@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\PurchaseRequest;
 use App\Models\MarketAnalysis;
 use App\Models\Rfq;
+use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 
@@ -24,7 +25,10 @@ class RfqController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        return $query->get();
+        return $query->get()->map(function ($ma) {
+            $ma->setRelation('items', $ma->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+            return $ma;
+        });
     }
 
     public function create()
@@ -94,14 +98,19 @@ class RfqController extends Controller
                 $quantity = (float) ($item->qty ?? 0);
                 $unitCost = (float) ($item->adjusted_price ?? 0);
 
-                $purchaseRequest->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'unit' => $item->unit,
                     'item_description' => $item->item_description,
                     'quantity' => $quantity,
                     'unit_cost' => $unitCost,
                     'total_cost' => $quantity * $unitCost,
-                ]);
+                ];
+
+                if (Schema::hasColumn('purchase_request_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $purchaseRequest->items()->create($payload);
             }
 
             $purchaseRequestId = $purchaseRequest->id;
@@ -121,14 +130,19 @@ class RfqController extends Controller
 
         // 2. Loop through and save the items pulled from the PR
         foreach ($data['items'] as $index => $item) {
-            $rfq->items()->create([
-                'sort_order' => $index,
+            $payload = [
                 'unit' => $item['unit'],
                 'item_description' => $item['item_description'],
                 'qty' => $item['qty'],
                 'abc_per_item' => $item['abc_per_item'],
                 'total_abc' => $item['total_abc'],
-            ]);
+            ];
+
+            if (Schema::hasColumn('rfq_items', 'sort_order')) {
+                $payload['sort_order'] = $index;
+            }
+
+            $rfq->items()->create($payload);
         }
 
         // 3. Force the browser to download the file
@@ -139,6 +153,8 @@ class RfqController extends Controller
     {
         $rfq = Rfq::with(['items', 'purchaseRequest'])->findOrFail($id);
         abort_unless($this->canViewAll() || $rfq->user_id === auth()->id(), 403);
+
+        $rfq->setRelation('items', $rfq->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
         
         // Load the PDF layout we are about to make
         $pdf = Pdf::loadView('pdf.rfq', compact('rfq'))->setPaper('a4', 'portrait');

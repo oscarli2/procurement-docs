@@ -6,6 +6,7 @@ use App\Models\MarketAnalysis;
 use Illuminate\Http\Request;
 use App\Models\PurchaseRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia; // We need this to tell React to force a download
 
@@ -24,7 +25,10 @@ class PurchaseRequestController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        return $query->get();
+        return $query->get()->map(function ($ma) {
+            $ma->setRelation('items', $ma->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+            return $ma;
+        });
     }
 
     public function create()
@@ -90,14 +94,19 @@ class PurchaseRequestController extends Controller
             ]);
 
             foreach ($data['items'] as $index => $item) {
-                $pr->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
                     'unit_cost' => $item['unit_cost'] ?? null,
                     'total_cost' => $item['total_cost'] ?? null,
-                ]);
+                ];
+
+                if (Schema::hasColumn('purchase_request_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $pr->items()->create($payload);
             }
 
             return $pr;
@@ -142,14 +151,19 @@ class PurchaseRequestController extends Controller
             $pr->items()->delete();
 
             foreach ($data['items'] as $index => $item) {
-                $pr->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
                     'unit_cost' => $item['unit_cost'] ?? null,
                     'total_cost' => $item['total_cost'] ?? null,
-                ]);
+                ];
+
+                if (Schema::hasColumn('purchase_request_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $pr->items()->create($payload);
             }
         });
 

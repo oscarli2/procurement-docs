@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\MarketAnalysis;
 use App\Models\Ppmp;
@@ -25,7 +26,10 @@ class PpmpController extends Controller
             $query->where('user_id', auth()->id());
         }
 
-        return $query->get();
+        return $query->get()->map(function ($ma) {
+            $ma->setRelation('items', $ma->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+            return $ma;
+        });
     }
 
     public function index()
@@ -173,8 +177,7 @@ class PpmpController extends Controller
             ]);
 
             foreach ($data['items'] as $index => $item) {
-                $ppmp->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'description' => $item['description'] ?? null,
                     'type' => $item['type'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
@@ -188,7 +191,13 @@ class PpmpController extends Controller
                     'budget' => $item['budget'] ?? null,
                     'supporting' => $item['supporting'] ?? null,
                     'remarks' => $item['remarks'] ?? null,
-                ]);
+                ];
+
+                if (Schema::hasColumn('ppmp_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $ppmp->items()->create($payload);
             }
 
             return $ppmp;
@@ -239,8 +248,7 @@ class PpmpController extends Controller
             $ppmp->items()->delete();
 
             foreach ($data['items'] as $index => $item) {
-                $ppmp->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'description' => $item['description'] ?? null,
                     'type' => $item['type'] ?? null,
                     'quantity' => $item['quantity'] ?? null,
@@ -254,7 +262,13 @@ class PpmpController extends Controller
                     'budget' => $item['budget'] ?? null,
                     'supporting' => $item['supporting'] ?? null,
                     'remarks' => $item['remarks'] ?? null,
-                ]);
+                ];
+
+                if (Schema::hasColumn('ppmp_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $ppmp->items()->create($payload);
             }
         });
 
@@ -278,6 +292,7 @@ class PpmpController extends Controller
     {
         $ppmp = Ppmp::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $ppmp->user_id === auth()->id(), 403);
+        $ppmp->setRelation('items', $ppmp->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
         // helper to format month/year values to MM/YYYY
         $fmtMonthYear = function ($val) {
             if (empty($val)) return '';

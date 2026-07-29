@@ -20,6 +20,6 @@ class PurchaseRequest extends Model
     // This tells Laravel: "One PR has many Items"
     public function items()
     {
-        return $this->hasMany(PurchaseRequestItem::class)->orderBy('sort_order')->orderBy('id');
+        return $this->hasMany(PurchaseRequestItem::class);
     }
 }

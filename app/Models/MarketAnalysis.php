@@ -18,7 +18,7 @@ class MarketAnalysis extends Model
 
     public function items()
     {
-        return $this->hasMany(MarketAnalysisItem::class)->orderBy('sort_order')->orderBy('id');
+        return $this->hasMany(MarketAnalysisItem::class);
     }
 
     public function getTotalAdjustedAttribute()

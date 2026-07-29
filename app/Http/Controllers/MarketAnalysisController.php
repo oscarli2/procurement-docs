@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MarketAnalysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 
@@ -18,6 +19,14 @@ class MarketAnalysisController extends Controller
     private function randomMarkup(): int
     {
         return [100, 150, 200, 250, 300][array_rand([100, 150, 200, 250, 300])];
+    }
+
+    private function sortItems($items)
+    {
+        return $items->sortBy([
+            ['sort_order', 'asc'],
+            ['id', 'asc'],
+        ])->values();
     }
 
     public function create()
@@ -48,6 +57,7 @@ class MarketAnalysisController extends Controller
 
         return Inertia::render('Procurement/CompletedMA', [
             'mas' => $query->get()->map(function (MarketAnalysis $ma) {
+                $items = $this->sortItems($ma->items);
                 return [
                     'id' => $ma->id,
                     'title' => $ma->title,
@@ -59,8 +69,8 @@ class MarketAnalysisController extends Controller
                     'contact_person' => $ma->contact_person,
                     'mobile_no' => $ma->mobile_no,
                     'signature' => $ma->signature,
-                    'items_count' => $ma->items->count(),
-                    'items' => $ma->items->map(fn ($item) => [
+                    'items_count' => $items->count(),
+                    'items' => $items->map(fn ($item) => [
                         'unit' => $item->unit,
                         'item_description' => $item->item_description,
                         'qty' => $item->qty,
@@ -78,6 +88,8 @@ class MarketAnalysisController extends Controller
     {
         $ma = MarketAnalysis::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $ma->user_id === auth()->id(), 403);
+
+        $ma->setRelation('items', $this->sortItems($ma->items));
 
         return Inertia::render('Procurement/CreateMA', [
             'ma' => $ma,
@@ -118,12 +130,17 @@ class MarketAnalysisController extends Controller
             ]);
 
             foreach ($data['items'] as $index => $item) {
-                $ma->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'qty' => $item['qty'] ?? null,
-                ]);
+                ];
+
+                if (Schema::hasColumn('market_analysis_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $ma->items()->create($payload);
             }
 
             return $ma;
@@ -177,15 +194,20 @@ class MarketAnalysisController extends Controller
 
                 $markup = $supplierPrice === null ? null : [100, 150, 200, 250, 300][array_rand([100, 150, 200, 250, 300])];
 
-                $ma->items()->create([
-                    'sort_order' => $index,
+                $payload = [
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'qty' => $item['qty'] ?? null,
                     'supplier_price' => $supplierPrice,
                     'markup_amount' => $markup,
                     'adjusted_price' => $supplierPrice === null ? null : $supplierPrice + $markup,
-                ]);
+                ];
+
+                if (Schema::hasColumn('market_analysis_items', 'sort_order')) {
+                    $payload['sort_order'] = $index;
+                }
+
+                $ma->items()->create($payload);
             }
         });
 
@@ -196,6 +218,8 @@ class MarketAnalysisController extends Controller
     {
         $ma = MarketAnalysis::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $ma->user_id === auth()->id(), 403);
+
+        $ma->setRelation('items', $this->sortItems($ma->items));
 
         $pdf = Pdf::loadView('pdf.ma', compact('ma'));
 
