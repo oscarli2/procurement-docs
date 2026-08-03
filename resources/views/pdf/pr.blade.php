@@ -20,6 +20,9 @@
         /* Table Configurations */
         table { width: 100%; border-collapse: collapse; }
         td, th { border: 1px solid black; padding: 5px; vertical-align: top; }
+        .item-description p { margin: 0; padding: 0; }
+        .item-description ul,
+        .item-description ol { margin: 0; padding-left: 18px; }
         
         /* Removing specific borders to merge sections seamlessly */
         .border-none { border: none !important; }
@@ -92,7 +95,7 @@
             <tr>
                 <td class="text-center"></td>
                 <td class="text-center">{{ $item->unit }}</td>
-                <td>{!! $item->item_description !!}</td>
+                <td class="item-description">{!! $item->item_description !!}</td>
                 <td class="text-center">{{ $item->quantity }}</td>
                 <td class="text-right">P {{ number_format($item->unit_cost, 2) }}</td>
                 <td class="text-right">P {{ number_format($item->total_cost, 2) }}</td>
