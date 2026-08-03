@@ -17,6 +17,18 @@ class PurchaseRequestController extends Controller
         return (bool) auth()->user()?->is_admin;
     }
 
+    private function orderedItems($items, string $table)
+    {
+        if (! Schema::hasColumn($table, 'sort_order')) {
+            return $items->sortBy('id')->values();
+        }
+
+        return $items->sortBy([
+            ['sort_order', 'asc'],
+            ['id', 'asc'],
+        ])->values();
+    }
+
     private function completedMarketAnalyses()
     {
         $query = MarketAnalysis::with('items')->where('status', 'priced')->latest();
@@ -26,7 +38,7 @@ class PurchaseRequestController extends Controller
         }
 
         return $query->get()->map(function ($ma) {
-            $ma->setRelation('items', $ma->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+            $ma->setRelation('items', $this->orderedItems($ma->items, 'market_analysis_items'));
             return $ma;
         });
     }
@@ -57,6 +69,7 @@ class PurchaseRequestController extends Controller
     {
         $pr = PurchaseRequest::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $pr->user_id === auth()->id(), 403);
+        $pr->setRelation('items', $this->orderedItems($pr->items, 'purchase_request_items'));
 
         return Inertia::render('Procurement/CreatePR', [
             'pr' => $pr,
@@ -186,6 +199,7 @@ class PurchaseRequestController extends Controller
         // Find the PR in the database, and pull its linked items too
         $pr = PurchaseRequest::with('items')->findOrFail($id);
         abort_unless($this->canViewAll() || $pr->user_id === auth()->id(), 403);
+        $pr->setRelation('items', $this->orderedItems($pr->items, 'purchase_request_items'));
 
         // Send the data to the layout we just made
         $pdf = Pdf::loadView('pdf.pr', compact('pr'));
