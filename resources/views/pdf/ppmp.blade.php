@@ -96,7 +96,7 @@
         <thead>
             {{-- Dompdf requires non-empty TD widths in the first row for fixed table layout. --}}
             <tr class="column-sizing">
-                <td width="23%" style="width:23%;">&nbsp;</td>
+                <td width="19%" style="width:19%;">&nbsp;</td>
                 <td width="8%" style="width:8%;">&nbsp;</td>
                 <td width="18%" style="width:18%;">&nbsp;</td>
                 <td width="10%" style="width:10%;">&nbsp;</td>
@@ -106,7 +106,7 @@
                 <td width="7%" style="width:7%;">&nbsp;</td>
                 <td width="6%" style="width:6%;">&nbsp;</td>
                 <td width="8%" style="width:8%;">&nbsp;</td>
-                <td width="3%" style="width:3%;">&nbsp;</td>
+                <td width="7%" style="width:7%;">&nbsp;</td>
                 <td width="3%" style="width:3%;">&nbsp;</td>
             </tr>
             <tr>
