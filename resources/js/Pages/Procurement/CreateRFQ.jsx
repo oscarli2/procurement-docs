@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
@@ -9,6 +9,73 @@ const mapMaItemToRfqItem = (item) => ({
   abc_per_item: Number(item.adjusted_price) || 0,
   total_abc: (Number(item.qty) || 0) * (Number(item.adjusted_price) || 0),
 });
+
+const ones = [
+  '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+  'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+  'Seventeen', 'Eighteen', 'Nineteen',
+];
+
+const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+
+const hundredsToWords = (value) => {
+  const parts = [];
+  const hundreds = Math.floor(value / 100);
+  const remainder = value % 100;
+
+  if (hundreds) {
+    parts.push(`${ones[hundreds]} Hundred`);
+  }
+
+  if (remainder < 20) {
+    if (remainder) parts.push(ones[remainder]);
+  } else {
+    const unit = remainder % 10;
+    parts.push(unit ? `${tens[Math.floor(remainder / 10)]}-${ones[unit]}` : tens[Math.floor(remainder / 10)]);
+  }
+
+  return parts.join(' ');
+};
+
+const integerToWords = (value) => {
+  if (value === 0) return 'Zero';
+
+  const parts = [];
+  let remaining = value;
+  let scaleIndex = 0;
+
+  while (remaining > 0 && scaleIndex < scales.length) {
+    const group = remaining % 1000;
+
+    if (group) {
+      const scale = scales[scaleIndex];
+      parts.unshift(`${hundredsToWords(group)}${scale ? ` ${scale}` : ''}`);
+    }
+
+    remaining = Math.floor(remaining / 1000);
+    scaleIndex += 1;
+  }
+
+  return parts.join(' ');
+};
+
+const currencyToWords = (amount) => {
+  const numericAmount = Number(amount);
+
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) return '';
+
+  const totalCentavos = Math.round(numericAmount * 100);
+  const pesos = Math.floor(totalCentavos / 100);
+  const centavos = totalCentavos % 100;
+  const pesoLabel = pesos === 1 ? 'Peso' : 'Pesos';
+  const pesoWords = `${integerToWords(pesos)} ${pesoLabel}`;
+
+  if (!centavos) return `${pesoWords} Only`;
+
+  const centavoLabel = centavos === 1 ? 'Centavo' : 'Centavos';
+  return `${pesoWords} and ${integerToWords(centavos)} ${centavoLabel} Only`;
+};
 
 export default function CreateRFQ({ prs = [], mas = [] }) {
   const [selectedPrId, setSelectedPrId] = useState('');
@@ -38,6 +105,13 @@ export default function CreateRFQ({ prs = [], mas = [] }) {
     () => rfqItems.reduce((sum, item) => sum + Number.parseFloat(item.total_abc || 0), 0),
     [rfqItems],
   );
+
+  useEffect(() => {
+    setRfqHeader((current) => ({
+      ...current,
+      abc_words: currencyToWords(grandTotal),
+    }));
+  }, [grandTotal]);
 
   const handlePrSelection = (e) => {
     const prId = e.target.value;
@@ -250,7 +324,7 @@ export default function CreateRFQ({ prs = [], mas = [] }) {
                 <input
                   type="text"
                   className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-3 italic shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  placeholder="Type budget in words (e.g., One Hundred Thousand Pesos)"
+                  placeholder="Automatically generated from the Total ABC"
                   value={rfqHeader.abc_words}
                   onChange={(e) => setRfqHeader({ ...rfqHeader, abc_words: e.target.value })}
                 />
@@ -259,7 +333,7 @@ export default function CreateRFQ({ prs = [], mas = [] }) {
                 </div>
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                Ensure the word form matches the calculated figure form exactly. This maps directly to the DILG Region 8 RFQ layout.
+                Automatically generated from the calculated Total ABC. You may edit the wording if needed.
               </p>
             </div>
           </section>
