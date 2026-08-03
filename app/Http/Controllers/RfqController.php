@@ -17,6 +17,18 @@ class RfqController extends Controller
         return (bool) auth()->user()?->is_admin;
     }
 
+    private function orderedItems($items, string $table)
+    {
+        if (! Schema::hasColumn($table, 'sort_order')) {
+            return $items->sortBy('id')->values();
+        }
+
+        return $items->sortBy([
+            ['sort_order', 'asc'],
+            ['id', 'asc'],
+        ])->values();
+    }
+
     private function completedMarketAnalyses()
     {
         $query = MarketAnalysis::with('items')->where('status', 'priced')->latest();
@@ -26,7 +38,7 @@ class RfqController extends Controller
         }
 
         return $query->get()->map(function ($ma) {
-            $ma->setRelation('items', $ma->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+            $ma->setRelation('items', $this->orderedItems($ma->items, 'market_analysis_items'));
             return $ma;
         });
     }
@@ -39,7 +51,10 @@ class RfqController extends Controller
             $prsQuery->where('user_id', auth()->id());
         }
 
-        $prs = $prsQuery->get();
+        $prs = $prsQuery->get()->map(function ($pr) {
+            $pr->setRelation('items', $this->orderedItems($pr->items, 'purchase_request_items'));
+            return $pr;
+        });
         return Inertia::render('Procurement/CreateRFQ', [
             'prs' => $prs,
             'mas' => $this->completedMarketAnalyses(),
@@ -86,6 +101,10 @@ class RfqController extends Controller
         if (! $purchaseRequestId && ! empty($data['selectedMaId'])) {
             $marketAnalysis = MarketAnalysis::with('items')->findOrFail($data['selectedMaId']);
             abort_unless($this->canViewAll() || $marketAnalysis->user_id === auth()->id(), 403);
+            $marketAnalysis->setRelation(
+                'items',
+                $this->orderedItems($marketAnalysis->items, 'market_analysis_items')
+            );
 
             $purchaseRequest = PurchaseRequest::create([
                 'user_id' => auth()->id(),
@@ -154,7 +173,7 @@ class RfqController extends Controller
         $rfq = Rfq::with(['items', 'purchaseRequest'])->findOrFail($id);
         abort_unless($this->canViewAll() || $rfq->user_id === auth()->id(), 403);
 
-        $rfq->setRelation('items', $rfq->items->sortBy([['sort_order', 'asc'], ['id', 'asc']])->values());
+        $rfq->setRelation('items', $this->orderedItems($rfq->items, 'rfq_items'));
         
         // Load the PDF layout we are about to make
         $pdf = Pdf::loadView('pdf.rfq', compact('rfq'))->setPaper('a4', 'portrait');
