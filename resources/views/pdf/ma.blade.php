@@ -13,6 +13,7 @@
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .font-bold { font-weight: bold; }
+        .peso-symbol { font-family: "DejaVu Sans", sans-serif; }
         .item-cell ul,
         .item-cell ol,
         .item-cell p { margin: 0; padding: 0; }
@@ -94,7 +95,11 @@
                 <tr class="item-row">
                     <td class="item-cell">{!! $item->item_description !!}</td>
                     <td class="text-center">{{ $item->qty !== null ? $item->qty : '' }}</td>
-                    <td class="text-center">{{ $item->supplier_price !== null ? '₱ ' . number_format($item->supplier_price, 2) : '' }}</td>
+                    <td class="text-center">
+                        @if ($item->supplier_price !== null)
+                            <span class="peso-symbol">&#8369;</span> {{ number_format($item->supplier_price, 2) }}
+                        @endif
+                    </td>
                 </tr>
             @empty
                 <tr class="item-row">
