@@ -42,7 +42,7 @@ const modeOptions = [
 
 const mapMaItemToPpmpItem = (item, marketAnalysis) => {
   const quantity = Number(item.qty) || 0;
-  const adjustedPrice = Number(item.adjusted_price) || 0;
+  const supplierPrice = Number(item.supplier_price) || 0;
 
   return {
     description: item.item_description || '',
@@ -55,7 +55,7 @@ const mapMaItemToPpmpItem = (item, marketAnalysis) => {
     end: '',
     delivery: '',
     source: `Completed MA #${marketAnalysis.id}`,
-    budget: quantity * adjustedPrice,
+    budget: quantity * supplierPrice,
     supporting: marketAnalysis.title || marketAnalysis.company_name || 'Completed market analysis',
     remarks: `Imported from completed MA item ${item.id || ''}`.trim(),
   };
@@ -225,7 +225,7 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-slate-900">Import Completed Market Analysis</h3>
-              <p className="text-sm text-slate-600">Load adjusted MA items into the PPMP item cards.</p>
+              <p className="text-sm text-slate-600">Load MA items with their original quoted prices into the PPMP item cards.</p>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">

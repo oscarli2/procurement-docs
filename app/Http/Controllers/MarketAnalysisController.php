@@ -16,11 +16,6 @@ class MarketAnalysisController extends Controller
         return (bool) auth()->user()?->is_admin;
     }
 
-    private function randomMarkup(): int
-    {
-        return [100, 150, 200, 250, 300][array_rand([100, 150, 200, 250, 300])];
-    }
-
     private function sortItems($items)
     {
         return $items->sortBy([
@@ -75,10 +70,7 @@ class MarketAnalysisController extends Controller
                         'item_description' => $item->item_description,
                         'qty' => $item->qty,
                         'supplier_price' => $item->supplier_price,
-                        'markup_amount' => $item->markup_amount,
-                        'adjusted_price' => $item->adjusted_price,
                     ]),
-                    'total_adjusted' => $ma->total_adjusted,
                 ];
             }),
         ]);
@@ -192,15 +184,11 @@ class MarketAnalysisController extends Controller
                     ? (float) $item['supplier_price']
                     : null;
 
-                $markup = $supplierPrice === null ? null : [100, 150, 200, 250, 300][array_rand([100, 150, 200, 250, 300])];
-
                 $payload = [
                     'unit' => $item['unit'] ?? null,
                     'item_description' => $item['item_description'] ?? null,
                     'qty' => $item['qty'] ?? null,
                     'supplier_price' => $supplierPrice,
-                    'markup_amount' => $markup,
-                    'adjusted_price' => $supplierPrice === null ? null : $supplierPrice + $markup,
                 ];
 
                 if (Schema::hasColumn('market_analysis_items', 'sort_order')) {

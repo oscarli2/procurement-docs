@@ -25,14 +25,13 @@ export default function CompletedMA({ mas = [] }) {
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Company</th>
                 <th className="px-4 py-3">Items</th>
-                <th className="px-4 py-3">Total Adjusted</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {mas.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-4 py-8 text-center text-sm text-slate-500">
+                  <td colSpan="5" className="px-4 py-8 text-center text-sm text-slate-500">
                     No completed MA records yet.
                   </td>
                 </tr>
@@ -43,7 +42,6 @@ export default function CompletedMA({ mas = [] }) {
                     <td className="px-4 py-3">{ma.title || '-'}</td>
                     <td className="px-4 py-3">{ma.company_name || '-'}</td>
                     <td className="px-4 py-3">{ma.items_count ?? ma.items?.length ?? 0}</td>
-                    <td className="px-4 py-3">₱ {Number(ma.total_adjusted || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <Link href={`/mas/${ma.id}/edit`} className="rounded-lg bg-amber-500 px-3 py-1.5 text-white">

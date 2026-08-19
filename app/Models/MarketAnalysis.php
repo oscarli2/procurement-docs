@@ -21,13 +21,6 @@ class MarketAnalysis extends Model
         return $this->hasMany(MarketAnalysisItem::class);
     }
 
-    public function getTotalAdjustedAttribute()
-    {
-        return $this->items->sum(function ($item) {
-            return (float) ($item->qty ?? 0) * (float) ($item->adjusted_price ?? 0);
-        });
-    }
-
     public function getCompletedAttribute()
     {
         return $this->status === 'priced';

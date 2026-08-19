@@ -6,8 +6,8 @@ const mapMaItemToRfqItem = (item) => ({
   unit: item.unit || 'pc',
   item_description: item.item_description || '',
   qty: Number(item.qty) || 0,
-  abc_per_item: Number(item.adjusted_price) || 0,
-  total_abc: (Number(item.qty) || 0) * (Number(item.adjusted_price) || 0),
+  abc_per_item: Number(item.supplier_price) || 0,
+  total_abc: (Number(item.qty) || 0) * (Number(item.supplier_price) || 0),
 });
 
 const ones = [

@@ -16,8 +16,4 @@ class MarketAnalysisItem extends Model
         return $this->belongsTo(MarketAnalysis::class);
     }
 
-    public function getMarkupAmountAttribute($value)
-    {
-        return $value === null ? null : (int) $value;
-    }
 }

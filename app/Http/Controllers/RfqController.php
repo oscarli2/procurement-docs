@@ -115,7 +115,7 @@ class RfqController extends Controller
 
             foreach ($marketAnalysis->items as $index => $item) {
                 $quantity = (float) ($item->qty ?? 0);
-                $unitCost = (float) ($item->adjusted_price ?? 0);
+                $unitCost = (float) ($item->supplier_price ?? 0);
 
                 $payload = [
                     'unit' => $item->unit,
