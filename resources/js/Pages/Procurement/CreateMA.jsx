@@ -46,8 +46,11 @@ export default function CreateMA({ ma = null }) {
     return mapped.length > 0 ? mapped : [emptyItem()];
   });
 
-  const totalAdjusted = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item.supplier_price || 0), 0),
+  const totalEncoded = useMemo(
+    () => items.reduce(
+      (sum, item) => sum + (Number(item.qty) || 0) * (Number(item.supplier_price) || 0),
+      0,
+    ),
     [items],
   );
 
@@ -236,7 +239,7 @@ export default function CreateMA({ ma = null }) {
           </div>
 
           <div className="mt-4 text-sm text-slate-600">
-            Current encoded total preview: ₱ {totalAdjusted.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Current encoded total preview: ₱ {totalEncoded.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
       </div>
