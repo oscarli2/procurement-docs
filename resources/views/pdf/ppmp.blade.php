@@ -15,6 +15,9 @@
         tr { page-break-inside: auto; break-inside: auto; }
         .ppmp-item-row { page-break-inside: auto; break-inside: auto; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+        .quantity-size .size-content,
+        .quantity-size .size-content p { display: inline; margin: 0; padding: 0; }
+        .quantity-size .size-content p + p::before { content: " "; }
         .column-sizing td {
             height: 1px;
             min-height: 1px;
@@ -134,11 +137,8 @@
             <tr class="ppmp-item-row">
                 <td class="ppmp-long-text">{!! $item['description'] !!}</td>
                 <td class="text-center">{{ $item['type'] }}</td>
-                <td class="text-center ppmp-long-text">
-                    {!! nl2br(e($item['quantity'])) !!}
-                    @if(!empty($item['size']))
-                        <div style="margin-top:4px; text-align:left;">{!! $item['size'] !!}</div>
-                    @endif
+                <td class="text-center ppmp-long-text quantity-size">
+                    <span>{!! nl2br(e($item['quantity'])) !!}</span>@if(!empty($item['size']))<span> </span><span class="size-content">{!! $item['size'] !!}</span>
                 </td>
                 <td class="text-center">{{ $item['mode'] }}</td>
                 <td class="text-center">{{ $item['pre_procurement'] }}</td>
