@@ -138,7 +138,7 @@
                 <td class="ppmp-long-text">{!! $item['description'] !!}</td>
                 <td class="text-center">{{ $item['type'] }}</td>
                 <td class="text-center ppmp-long-text quantity-size">
-                    <span>{!! nl2br(e($item['quantity'])) !!}</span>@if(!empty($item['size']))<span> </span><span class="size-content">{!! $item['size'] !!}</span>
+                    <span>{!! nl2br(e($item['quantity'])) !!}</span>@if(!empty($item['size']))<span> </span><span class="size-content">{!! $item['size'] !!}</span>@endif
                 </td>
                 <td class="text-center">{{ $item['mode'] }}</td>
                 <td class="text-center">{{ $item['pre_procurement'] }}</td>
