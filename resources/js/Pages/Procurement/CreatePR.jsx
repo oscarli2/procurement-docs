@@ -46,7 +46,8 @@ export default function CreatePR({ pr = null, mas = [] }) {
   );
 
   const [newItem, setNewItem] = useState(() => createEmptyItem());
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [inlineEditingIndex, setInlineEditingIndex] = useState(null);
+  const [inlineDraft, setInlineDraft] = useState(null);
 
   const selectedMa = useMemo(
     () => mas.find((ma) => String(ma.id) === String(selectedMaId)) || null,
@@ -72,7 +73,8 @@ export default function CreatePR({ pr = null, mas = [] }) {
     }
 
     setItems(matchedMa.items.map(mapMaItemToPrItem));
-    setEditingIndex(null);
+    setInlineEditingIndex(null);
+    setInlineDraft(null);
     resetNewItem();
     setHeaderData((current) => ({
       ...current,
@@ -91,27 +93,43 @@ export default function CreatePR({ pr = null, mas = [] }) {
       total_cost: newItem.quantity * newItem.unit_cost,
     };
 
-    if (editingIndex === null) {
-      setItems([...items, itemToSave]);
-    } else {
-      const copy = [...items];
-      copy[editingIndex] = itemToSave;
-      setItems(copy);
-      setEditingIndex(null);
-    }
+    setItems([...items, itemToSave]);
 
     resetNewItem();
   };
 
-  const handleEditItem = (index) => {
+  const handleStartInlineEdit = (index) => {
     const item = items[index];
-    setNewItem({
+    setInlineDraft({
       unit: item.unit,
       item_description: item.item_description,
       quantity: Number(item.quantity) || 0,
       unit_cost: Number(item.unit_cost) || 0,
     });
-    setEditingIndex(index);
+    setInlineEditingIndex(index);
+  };
+
+  const handleSaveInlineEdit = () => {
+    if (!inlineDraft?.item_description || inlineDraft.item_description === '<p><br></p>') {
+      alert('Please enter an item description.');
+      return;
+    }
+
+    setItems((currentItems) => currentItems.map((item, index) => (
+      index === inlineEditingIndex
+        ? {
+            ...inlineDraft,
+            total_cost: inlineDraft.quantity * inlineDraft.unit_cost,
+          }
+        : item
+    )));
+    setInlineEditingIndex(null);
+    setInlineDraft(null);
+  };
+
+  const handleCancelInlineEdit = () => {
+    setInlineEditingIndex(null);
+    setInlineDraft(null);
   };
 
   const handleRemoveItem = (index) => {
@@ -119,13 +137,19 @@ export default function CreatePR({ pr = null, mas = [] }) {
     copy.splice(index, 1);
     setItems(copy);
 
-    if (editingIndex === index) {
-      setEditingIndex(null);
-      resetNewItem();
+    if (inlineEditingIndex === index) {
+      handleCancelInlineEdit();
+    } else if (inlineEditingIndex > index) {
+      setInlineEditingIndex(inlineEditingIndex - 1);
     }
   };
 
   const handleSubmit = () => {
+    if (inlineEditingIndex !== null) {
+      alert('Please save or cancel the item currently being edited.');
+      return;
+    }
+
     const payload = {
       ...headerData,
       items,
@@ -320,21 +344,8 @@ export default function CreatePR({ pr = null, mas = [] }) {
                   onClick={handleSaveItem}
                   className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
                 >
-                  {editingIndex === null ? '+ Add to List' : 'Update Item'}
+                  + Add to List
                 </button>
-
-                {editingIndex !== null && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingIndex(null);
-                      resetNewItem();
-                    }}
-                    className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                  >
-                    Cancel Edit
-                  </button>
-                )}
               </div>
             </div>
           </section>
@@ -370,38 +381,113 @@ export default function CreatePR({ pr = null, mas = [] }) {
                       </td>
                     </tr>
                   ) : (
-                    items.map((item, index) => (
-                      <tr key={index} className="align-top hover:bg-slate-50/80">
-                        <td className="px-4 py-4 text-center text-sm font-medium text-slate-700">{item.unit}</td>
-                        <td
-                          className="px-4 py-4 text-sm leading-6 text-slate-700 [&_ul]:ml-5 [&_ul]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal"
-                          dangerouslySetInnerHTML={{ __html: item.item_description }}
-                        />
-                        <td className="px-4 py-4 text-center text-sm text-slate-700">{item.quantity}</td>
-                        <td className="px-4 py-4 text-sm text-slate-700">₱ {item.unit_cost.toLocaleString()}</td>
-                        <td className="px-4 py-4 text-sm font-semibold text-slate-900">
-                          ₱ {item.total_cost.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <div className="flex flex-wrap justify-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleEditItem(index)}
-                              className="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-amber-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveItem(index)}
-                              className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    items.map((item, index) => {
+                      const isInlineEditing = inlineEditingIndex === index;
+
+                      return (
+                        <tr key={index} className={`align-top ${isInlineEditing ? 'bg-amber-50/60' : 'hover:bg-slate-50/80'}`}>
+                          <td className="px-3 py-3 text-center text-sm font-medium text-slate-700">
+                            {isInlineEditing ? (
+                              <select
+                                className="w-full rounded-lg border border-slate-300 bg-white px-2 py-2"
+                                value={inlineDraft.unit}
+                                onChange={(e) => setInlineDraft({ ...inlineDraft, unit: e.target.value })}
+                              >
+                                <option value="pc">pc</option>
+                                <option value="box">box</option>
+                                <option value="set">set</option>
+                                <option value="pack">pack</option>
+                              </select>
+                            ) : item.unit}
+                          </td>
+                          <td className="px-3 py-3 text-sm leading-6 text-slate-700">
+                            {isInlineEditing ? (
+                              <div className="min-w-[320px] rounded-lg border border-slate-300 bg-white p-1">
+                                <ReactQuill
+                                  theme="snow"
+                                  value={inlineDraft.item_description}
+                                  onChange={(content) => setInlineDraft({ ...inlineDraft, item_description: content })}
+                                  modules={quillModules}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className="[&_ul]:ml-5 [&_ul]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal"
+                                dangerouslySetInnerHTML={{ __html: item.item_description }}
+                              />
+                            )}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-slate-700">
+                            {isInlineEditing ? (
+                              <input
+                                type="number"
+                                min="1"
+                                className="w-20 rounded-lg border border-slate-300 bg-white px-2 py-2"
+                                value={inlineDraft.quantity}
+                                onChange={(e) => setInlineDraft({ ...inlineDraft, quantity: parseFloat(e.target.value) || 0 })}
+                              />
+                            ) : item.quantity}
+                          </td>
+                          <td className="px-3 py-3 text-sm text-slate-700">
+                            {isInlineEditing ? (
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                className="w-28 rounded-lg border border-slate-300 bg-white px-2 py-2"
+                                value={inlineDraft.unit_cost}
+                                onChange={(e) => setInlineDraft({ ...inlineDraft, unit_cost: parseFloat(e.target.value) || 0 })}
+                              />
+                            ) : `₱ ${item.unit_cost.toLocaleString()}`}
+                          </td>
+                          <td className="px-3 py-3 text-sm font-semibold text-slate-900">
+                            ₱ {(isInlineEditing
+                              ? inlineDraft.quantity * inlineDraft.unit_cost
+                              : item.total_cost
+                            ).toLocaleString()}
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <div className="flex flex-wrap justify-center gap-2">
+                              {isInlineEditing ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={handleSaveInlineEdit}
+                                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={handleCancelInlineEdit}
+                                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartInlineEdit(index)}
+                                    className="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-amber-600"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveItem(index)}
+                                    className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700"
+                                  >
+                                    Remove
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                   <tr className="bg-slate-50">
                     <td
