@@ -15,6 +15,14 @@
         tr { page-break-inside: auto; break-inside: auto; }
         .ppmp-item-row { page-break-inside: avoid; break-inside: avoid; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+        .ppmp-long-text p { margin: 0; padding: 0; }
+        .ppmp-long-text ul,
+        .ppmp-long-text ol {
+            margin: 0;
+            padding-left: 14px;
+            list-style-position: inside;
+        }
+        .ppmp-long-text li { margin: 0; padding: 0; }
         .quantity-size,
         .quantity-size * { text-align: left !important; }
         .quantity-size .size-content,
