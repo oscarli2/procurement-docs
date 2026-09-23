@@ -138,14 +138,19 @@
             @php
                 $splitPdfContent = function ($value, $limit, $richText = false) {
                     $value = (string) ($value ?? '');
-                    $plain = trim(html_entity_decode(strip_tags(preg_replace(
+                    $normalized = preg_replace(
                         ['/<br\s*\/?>/i', '/<\/p>/i', '/<\/li>/i'],
                         ["\n", "\n", "\n"],
                         $value
-                    )), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                    ) ?: '';
+                    $plain = trim(html_entity_decode(strip_tags($normalized), ENT_QUOTES, 'UTF-8'));
 
                     if ($plain === '') return [''];
-                    if (mb_strlen($plain) <= $limit) return [$richText ? $value : $plain];
+                    $textLength = function ($text) {
+                        return function_exists('mb_strlen') ? mb_strlen($text) : strlen($text);
+                    };
+
+                    if ($textLength($plain) <= $limit) return [$richText ? $value : $plain];
 
                     $words = preg_split('/\s+/u', $plain, -1, PREG_SPLIT_NO_EMPTY);
                     $chunks = [];
@@ -153,7 +158,7 @@
 
                     foreach ($words as $word) {
                         $candidate = $chunk === '' ? $word : $chunk . ' ' . $word;
-                        if ($chunk !== '' && mb_strlen($candidate) > $limit) {
+                        if ($chunk !== '' && $textLength($candidate) > $limit) {
                             $chunks[] = nl2br(e($chunk));
                             $chunk = $word;
                         } else {
@@ -190,7 +195,15 @@
                         <td class="ppmp-long-text">{!! $parts['description'][$partIndex] ?? '' !!}</td>
                         <td class="text-center">{{ $parts['type'][$partIndex] ?? '' }}</td>
                         <td class="ppmp-long-text quantity-size">
-                            @if($partIndex === 0 && !empty($item['quantity']))<span>{!! nl2br(e($item['quantity'])) !!}</span>@endif@if(!empty($parts['size'][$partIndex] ?? ''))@if($partIndex === 0 && !empty($item['quantity']))<span> </span>@endif<span class="size-content">{!! $parts['size'][$partIndex] !!}</span>@endif
+                            @if($partIndex === 0 && !empty($item['quantity']))
+                                <span>{!! nl2br(e($item['quantity'])) !!}</span>
+                            @endif
+                            @if(!empty($parts['size'][$partIndex] ?? ''))
+                                @if($partIndex === 0 && !empty($item['quantity']))
+                                    <span> </span>
+                                @endif
+                                <span class="size-content">{!! $parts['size'][$partIndex] !!}</span>
+                            @endif
                         </td>
                         <td class="text-center">{{ $parts['mode'][$partIndex] ?? '' }}</td>
                         <td class="text-center">{{ $parts['pre_procurement'][$partIndex] ?? '' }}</td>
