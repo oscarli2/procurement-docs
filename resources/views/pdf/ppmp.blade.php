@@ -19,7 +19,6 @@
         .quantity-size * { text-align: left !important; }
         .quantity-size .size-content,
         .quantity-size .size-content p { display: inline; margin: 0; padding: 0; }
-        .quantity-size .size-content p + p::before { content: " "; }
         .column-sizing td {
             height: 1px;
             min-height: 1px;
@@ -151,6 +150,34 @@
                     };
 
                     if ($textLength($plain) <= $limit) return [$richText ? $value : $plain];
+
+                    if ($richText) {
+                        preg_match_all('/<(p|li)\b[^>]*>.*?<\/\1>/is', $value, $blockMatches);
+                        $blocks = $blockMatches[0] ?? [];
+
+                        if (count($blocks) > 1) {
+                            $chunks = [];
+                            $chunk = '';
+                            $chunkLength = 0;
+
+                            foreach ($blocks as $block) {
+                                $blockText = trim(html_entity_decode(strip_tags($block), ENT_QUOTES, 'UTF-8'));
+                                $blockLength = $textLength($blockText);
+
+                                if ($chunk !== '' && $chunkLength + $blockLength > $limit) {
+                                    $chunks[] = $chunk;
+                                    $chunk = '';
+                                    $chunkLength = 0;
+                                }
+
+                                $chunk .= $block;
+                                $chunkLength += $blockLength;
+                            }
+
+                            if ($chunk !== '') $chunks[] = $chunk;
+                            return $chunks ?: [$value];
+                        }
+                    }
 
                     $words = preg_split('/\s+/u', $plain, -1, PREG_SPLIT_NO_EMPTY);
                     $chunks = [];
