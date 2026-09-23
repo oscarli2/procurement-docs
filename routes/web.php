@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/ppmps/{id}/edit', [PpmpController::class, 'edit']);
     Route::put('/ppmps/{id}', [PpmpController::class, 'update'])->name('ppmp.update');
     Route::delete('/ppmps/{id}', [PpmpController::class, 'destroy'])->name('ppmp.destroy');
+    Route::post('/ppmps/preview', [PpmpController::class, 'preview'])->name('ppmp.preview');
     Route::post('/ppmps', [PpmpController::class, 'store'])->name('ppmp.store');
     Route::get('/ppmps/{id}/download', [PpmpController::class, 'download'])->name('ppmp.download');
 });

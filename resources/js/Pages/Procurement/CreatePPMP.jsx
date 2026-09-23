@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ReactQuill from 'react-quill';
@@ -64,6 +64,9 @@ const mapMaItemToPpmpItem = (item, marketAnalysis) => {
 export default function CreatePPMP({ ppmp = null, mas = [] }) {
   const isEditing = Boolean(ppmp?.id);
   const [selectedMaId, setSelectedMaId] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewError, setPreviewError] = useState('');
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const [ppmpHeader, setPpmpHeader] = useState(() => ({
     fiscal_year: ppmp?.fiscal_year || new Date().getFullYear(),
@@ -97,6 +100,10 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
   });
 
   const selectedMa = mas.find((ma) => String(ma.id) === String(selectedMaId)) || null;
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const importCompletedMa = (maId) => {
     setSelectedMaId(maId);
@@ -138,6 +145,42 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
     }
 
     router.post('/ppmps', payload);
+  };
+
+  const handlePreview = async () => {
+    setIsPreviewing(true);
+    setPreviewError('');
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+      const response = await fetch('/ppmps/preview', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/pdf',
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ ...ppmpHeader, items }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const validationMessage = errorData?.errors
+          ? Object.values(errorData.errors).flat().join(' ')
+          : errorData?.message;
+        throw new Error(validationMessage || 'Could not generate the PPMP preview.');
+      }
+
+      const pdfBlob = await response.blob();
+      const nextPreviewUrl = URL.createObjectURL(pdfBlob);
+      setPreviewUrl(nextPreviewUrl);
+    } catch (error) {
+      setPreviewError(error.message || 'Could not generate the PPMP preview.');
+    } finally {
+      setIsPreviewing(false);
+    }
   };
 
   const savePreparedDefault = () => {
@@ -474,14 +517,53 @@ export default function CreatePPMP({ ppmp = null, mas = [] }) {
                 Add Item
               </button>
 
-              <button
-                onClick={handleSubmit}
-                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!items.length || !ppmpHeader.fiscal_year}
-              >
-                {isEditing ? 'Update & Generate PDF' : 'Save & Generate PDF'}
-              </button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handlePreview}
+                  className="inline-flex items-center justify-center rounded-xl border border-blue-300 bg-blue-50 px-6 py-3 text-base font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={isPreviewing || !items.length || !ppmpHeader.fiscal_year}
+                >
+                  {isPreviewing ? 'Generating Preview...' : 'Preview PDF'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!items.length || !ppmpHeader.fiscal_year}
+                >
+                  {isEditing ? 'Update & Generate PDF' : 'Save & Generate PDF'}
+                </button>
+              </div>
             </div>
+
+            {previewError && (
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {previewError}
+              </div>
+            )}
+
+            {previewUrl && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-300 bg-slate-100 shadow-inner">
+                <div className="flex items-center justify-between border-b border-slate-300 bg-white px-4 py-3">
+                  <div className="font-semibold text-slate-800">PPMP PDF Preview</div>
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-semibold text-blue-700 hover:text-blue-800"
+                  >
+                    Open in New Tab
+                  </a>
+                </div>
+                <iframe
+                  src={previewUrl}
+                  title="PPMP PDF Preview"
+                  className="h-[75vh] min-h-[640px] w-full bg-white"
+                />
+              </div>
+            )}
           </section>
         </div>
         </div>

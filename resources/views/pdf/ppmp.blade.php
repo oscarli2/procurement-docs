@@ -7,13 +7,13 @@
         @page { margin: 8mm 12mm 14mm; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; margin: 0; padding: 0; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed !important; border-spacing: 0; }
-        .ppmp-table { width: 306mm !important; table-layout: fixed !important; }
+        .ppmp-table { width: 273mm !important; table-layout: fixed !important; }
         th { border: 1px solid #000; padding: 4px 3px; vertical-align: middle; font-size: 8px; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.1; }
         td { border: 1px solid #000; padding: 6px 4px; vertical-align: top; font-size: 9px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
         thead { display: table-header-group; }
         tbody { display: table-row-group; }
         tr { page-break-inside: auto; break-inside: auto; }
-        .ppmp-item-row { page-break-inside: auto; break-inside: auto; }
+        .ppmp-item-row { page-break-inside: avoid; break-inside: avoid; }
         .ppmp-long-text { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
         .quantity-size,
         .quantity-size * { text-align: left !important; }
@@ -135,23 +135,74 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $splitPdfContent = function ($value, $limit, $richText = false) {
+                    $value = (string) ($value ?? '');
+                    $plain = trim(html_entity_decode(strip_tags(preg_replace(
+                        ['/<br\s*\/?>/i', '/<\/p>/i', '/<\/li>/i'],
+                        ["\n", "\n", "\n"],
+                        $value
+                    )), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+                    if ($plain === '') return [''];
+                    if (mb_strlen($plain) <= $limit) return [$richText ? $value : $plain];
+
+                    $words = preg_split('/\s+/u', $plain, -1, PREG_SPLIT_NO_EMPTY);
+                    $chunks = [];
+                    $chunk = '';
+
+                    foreach ($words as $word) {
+                        $candidate = $chunk === '' ? $word : $chunk . ' ' . $word;
+                        if ($chunk !== '' && mb_strlen($candidate) > $limit) {
+                            $chunks[] = nl2br(e($chunk));
+                            $chunk = $word;
+                        } else {
+                            $chunk = $candidate;
+                        }
+                    }
+
+                    if ($chunk !== '') $chunks[] = nl2br(e($chunk));
+                    return $chunks ?: [''];
+                };
+            @endphp
+
             @foreach($ppmp['items'] as $index => $item)
-            <tr class="ppmp-item-row">
-                <td class="ppmp-long-text">{!! $item['description'] !!}</td>
-                <td class="text-center">{{ $item['type'] }}</td>
-                <td class="ppmp-long-text quantity-size">
-                    <span>{!! nl2br(e($item['quantity'])) !!}</span>@if(!empty($item['size']))<span> </span><span class="size-content">{!! $item['size'] !!}</span>@endif
-                </td>
-                <td class="text-center">{{ $item['mode'] }}</td>
-                <td class="text-center">{{ $item['pre_procurement'] }}</td>
-                <td class="text-center">{{ $item['start'] }}</td>
-                <td class="text-center">{{ $item['end'] }}</td>
-                <td class="text-center">{{ $item['delivery'] }}</td>
-                <td class="text-center">{{ $item['source'] }}</td>
-                <td class="text-center">{{ $item['budget'] }}</td>
-                <td class="text-center">{{ $item['supporting'] }}</td>
-                <td class="text-center">{{ $item['remarks'] }}</td>
-            </tr>
+                @php
+                    $parts = [
+                        'description' => $splitPdfContent($item['description'], 650, true),
+                        'type' => $splitPdfContent($item['type'], 160),
+                        'size' => $splitPdfContent($item['size'], 600, true),
+                        'mode' => $splitPdfContent($item['mode'], 180),
+                        'pre_procurement' => $splitPdfContent($item['pre_procurement'], 100),
+                        'start' => $splitPdfContent($item['start'], 100),
+                        'end' => $splitPdfContent($item['end'], 100),
+                        'delivery' => $splitPdfContent($item['delivery'], 120),
+                        'source' => $splitPdfContent($item['source'], 180),
+                        'budget' => $splitPdfContent($item['budget'], 100),
+                        'supporting' => $splitPdfContent($item['supporting'], 140),
+                        'remarks' => $splitPdfContent($item['remarks'], 140),
+                    ];
+                    $partCount = max(array_map('count', $parts));
+                @endphp
+
+                @for($partIndex = 0; $partIndex < $partCount; $partIndex++)
+                    <tr class="ppmp-item-row">
+                        <td class="ppmp-long-text">{!! $parts['description'][$partIndex] ?? '' !!}</td>
+                        <td class="text-center">{{ $parts['type'][$partIndex] ?? '' }}</td>
+                        <td class="ppmp-long-text quantity-size">
+                            @if($partIndex === 0 && !empty($item['quantity']))<span>{!! nl2br(e($item['quantity'])) !!}</span>@endif@if(!empty($parts['size'][$partIndex] ?? ''))@if($partIndex === 0 && !empty($item['quantity']))<span> </span>@endif<span class="size-content">{!! $parts['size'][$partIndex] !!}</span>@endif
+                        </td>
+                        <td class="text-center">{{ $parts['mode'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['pre_procurement'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['start'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['end'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['delivery'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['source'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['budget'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['supporting'][$partIndex] ?? '' }}</td>
+                        <td class="text-center">{{ $parts['remarks'][$partIndex] ?? '' }}</td>
+                    </tr>
+                @endfor
             @endforeach
         </tbody>
     </table>

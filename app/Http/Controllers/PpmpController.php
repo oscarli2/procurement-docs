@@ -40,6 +40,93 @@ class PpmpController extends Controller
         ])->values();
     }
 
+    private function validationRules(): array
+    {
+        return [
+            'fiscal_year' => 'required|integer',
+            'end_user' => 'nullable|string',
+            'prepared_by_name' => 'nullable|string',
+            'prepared_by_designation' => 'nullable|string',
+            'submitted_by_name' => 'nullable|string',
+            'submitted_by_designation' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.type' => 'nullable|string',
+            'items.*.quantity' => 'nullable|numeric',
+            'items.*.size' => 'nullable|string',
+            'items.*.mode' => 'nullable|string',
+            'items.*.pre_procurement' => 'nullable|in:Yes,No',
+            'items.*.start' => 'nullable|string',
+            'items.*.end' => 'nullable|string',
+            'items.*.delivery' => 'nullable|string',
+            'items.*.source' => 'nullable|string',
+            'items.*.budget' => 'nullable|numeric',
+            'items.*.supporting' => 'nullable|string',
+            'items.*.remarks' => 'nullable|string',
+        ];
+    }
+
+    private function pdfViewData(array $data): array
+    {
+        $fmtMonthYear = function ($value) {
+            if (empty($value)) return '';
+            if (preg_match('/^(\d{4})-(\d{2})/', $value, $matches)) {
+                return $matches[2] . '/' . $matches[1];
+            }
+
+            $timestamp = strtotime($value);
+            return $timestamp === false ? $value : date('m/Y', $timestamp);
+        };
+
+        $fmtQuantity = function ($value) {
+            if ($value === null) return '';
+            $number = preg_replace('/[^0-9.\-]/', '', (string) $value);
+            return $number === '' ? '' : $number;
+        };
+
+        $fmtCurrency = function ($value) {
+            if ($value === null || $value === '') return '';
+            $number = preg_replace('/[^0-9.\-]/', '', (string) $value);
+            return 'PHP ' . number_format((float) $number, 2);
+        };
+
+        return [
+            'fiscal_year' => $data['fiscal_year'],
+            'end_user' => $data['end_user'] ?? '',
+            'items' => collect($data['items'])->map(fn ($item) => [
+                'description' => $item['description'] ?? '',
+                'type' => $item['type'] ?? '',
+                'quantity' => $fmtQuantity($item['quantity'] ?? null),
+                'size' => $item['size'] ?? '',
+                'mode' => $item['mode'] ?? '',
+                'pre_procurement' => ! empty($item['pre_procurement']) ? ucfirst($item['pre_procurement']) : '',
+                'start' => $fmtMonthYear($item['start'] ?? null),
+                'end' => $fmtMonthYear($item['end'] ?? null),
+                'delivery' => $fmtMonthYear($item['delivery'] ?? null),
+                'source' => $item['source'] ?? '',
+                'budget' => $fmtCurrency($item['budget'] ?? null),
+                'supporting' => $item['supporting'] ?? '',
+                'remarks' => $item['remarks'] ?? '',
+            ])->toArray(),
+            'prepared_by' => [
+                'name' => $data['prepared_by_name'] ?? '',
+                'designation' => $data['prepared_by_designation'] ?? '',
+            ],
+            'submitted_by' => [
+                'name' => $data['submitted_by_name'] ?? '',
+                'designation' => $data['submitted_by_designation'] ?? '',
+            ],
+        ];
+    }
+
+    public function preview(Request $request)
+    {
+        $viewData = $this->pdfViewData($request->validate($this->validationRules()));
+        $pdf = Pdf::loadView('pdf.ppmp', ['ppmp' => $viewData])->setPaper('a4', 'landscape');
+
+        return $pdf->stream('PPMP-preview.pdf');
+    }
+
     public function index()
     {
         $query = Ppmp::withCount('items')->latest();
@@ -132,7 +219,7 @@ class PpmpController extends Controller
             ]
         ];
 
-        $pdf = Pdf::loadView('pdf.ppmp', compact('ppmp'))->setPaper('folio', 'landscape');
+        $pdf = Pdf::loadView('pdf.ppmp', compact('ppmp'))->setPaper('a4', 'landscape');
 
         return $pdf->download('PPMP-' . $ppmp['fiscal_year'] . '.pdf');
     }
@@ -365,7 +452,7 @@ class PpmpController extends Controller
             ],
         ];
 
-        $pdf = Pdf::loadView('pdf.ppmp', ['ppmp' => $viewData])->setPaper('folio', 'landscape');
+        $pdf = Pdf::loadView('pdf.ppmp', ['ppmp' => $viewData])->setPaper('a4', 'landscape');
 
         return $pdf->download('PPMP-' . $ppmp->id . '-' . $ppmp->fiscal_year . '.pdf');
     }
